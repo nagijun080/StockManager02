@@ -13,5 +13,6 @@
     <string name="address_name">ご  住  所 : </string>
     <string name="title_client_view_activity">ClientViewActivity</string>
     <string name="guest_setting">お客様設定</string>
+    <string name="title_item_view_activity">ItemViewActivity</string>
 
 </resources>

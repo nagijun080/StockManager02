@@ -21,6 +21,7 @@
             </intent-filter>
         </activity>
         <activity android:label="@string/title_client_view_activity" android:name="ClientViewActivity"></activity>
+        <activity android:name="ItemViewActivity" android:label="@string/title_item_view_activity"></activity>
     </application>
 
 </manifest>

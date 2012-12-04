@@ -68,8 +68,8 @@
 
     		        <Button
     		            android:id="@+id/serchButton"
-    		            android:layout_width="25dp"
-    		            android:layout_height="25dp"
+    		            android:layout_width="16dp"
+    		            android:layout_height="16dp"
     		            android:layout_gravity="center_vertical|right"
     		            android:layout_marginLeft="30dp"
     		            android:background="@drawable/btnserch"

@@ -53,7 +53,8 @@ public final class R {
     }
     public static final class layout {
         public static final int clientview_layout=0x7f030000;
-        public static final int login_layout=0x7f030001;
+        public static final int item_view_layout=0x7f030001;
+        public static final int login_layout=0x7f030002;
     }
     public static final class menu {
         public static final int login_layout=0x7f060000;
@@ -71,6 +72,7 @@ public final class R {
         public static final int owner_number=0x7f040004;
         public static final int password=0x7f040001;
         public static final int title_client_view_activity=0x7f04000b;
+        public static final int title_item_view_activity=0x7f04000d;
         public static final int title_login_activity=0x7f040003;
     }
     public static final class style {
