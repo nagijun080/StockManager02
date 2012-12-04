@@ -2,6 +2,7 @@ package com.example.stockmanagerforandroid;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class ClientViewActivity extends Activity {
 
@@ -34,18 +36,20 @@ public class ClientViewActivity extends Activity {
 	private String dateName;
 	private String postNumber;
 	private String addressName;
+	
+	public AlertDialog.Builder dialog;
+	public ListView listView;
+	public ArrayAdapter<String> adapter;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.clientview_layout);
 		
-		final Dialog dialog = new Dialog(this);
-		dialog.setContentView(R.layout.alert_dialog_layout);
 		Log.d("ClientViewActivity()", "01");
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1, USERNAME);
+		adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, USERNAME);
 		Log.d("ClientViewActivity()", adapter.getItem(0));
-		listViewInDialog(adapter);
+		//listViewInDialog(adapter);
 		//serchButtonを押したらDialogが表示される
 		//serchButtonにOnClickListener登録
 		Button serchButton = (Button)findViewById(R.id.serchButton);
@@ -53,6 +57,12 @@ public class ClientViewActivity extends Activity {
 
 			public void onClick(View v) {
 				// TODO 自動生成されたメソッド・スタブ
+				dialog = new AlertDialog.Builder(ClientViewActivity.this);
+				dialog.setTitle(R.string.guest_name);
+				dialog.setPositiveButton(R.string.guest_setting, null);
+				listViewSetting();
+				dialog.setView(listView);
+				dialog.create();
 				dialog.show();
 			}
 			
@@ -65,19 +75,36 @@ public class ClientViewActivity extends Activity {
 		super.onStop();
 	}
 	
-	public void listViewInDialog(ArrayAdapter<String> adapter) {
-		ListView listView = (ListView)findViewById(R.id.listView);
+	public void listViewSetting() {
+		listView = new ListView(this);
 		listView.setAdapter(adapter);
+		listView.setScrollingCacheEnabled(false);
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			//リスト項目がクリックされた時の処理
 			public void onItemClick(AdapterView<?> adapter, View view, int position,
 					long id) {
 				// TODO 自動生成されたメソッド・スタブ
 				
+				Toast.makeText(ClientViewActivity.this, "dialog", Toast.LENGTH_LONG).show();
 			}
 			
 		});
 	}
+	/*public void listViewInDialog(ArrayAdapter<String> adapter) {
+		ListView listView = (ListView)findViewById(R.id.listView);
+		listView.setAdapter(adapter);
+		listView.setScrollingCacheEnabled(false);
+		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			//リスト項目がクリックされた時の処理
+			public void onItemClick(AdapterView<?> adapter, View view, int position,
+					long id) {
+				// TODO 自動生成されたメソッド・スタブ
+				
+				Toast.makeText(ClientViewActivity.this, "dialog", Toast.LENGTH_LONG).show();
+			}
+			
+		});
+	}*/
 	
 
 }

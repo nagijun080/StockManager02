@@ -12,5 +12,6 @@
     <string name="date_name">期　　日 : </string>
     <string name="address_name">ご  住  所 : </string>
     <string name="title_client_view_activity">ClientViewActivity</string>
+    <string name="guest_setting">お客様設定</string>
 
 </resources>
