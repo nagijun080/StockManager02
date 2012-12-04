@@ -38,6 +38,14 @@
 		
 		        </EditText>
 		    </TableRow>
+
+		    <Button
+		        android:id="@+id/button"
+		        style="?android:attr/buttonStyleSmall"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="Button" />
+
 	    </LinearLayout>
     	<LinearLayout
             android:layout_width="match_parent"
@@ -55,7 +63,7 @@
 
     		    <TableRow
     		        android:id="@+id/tableRow2"
-    		        android:layout_width="wrap_content"
+    		        android:layout_width="match_parent"
     		        android:layout_height="match_parent" 
     		        android:layout_marginTop="15dp">
     		        <TextView
@@ -68,14 +76,16 @@
 
     		        <Button
     		            android:id="@+id/serchButton"
-    		            android:layout_width="16dp"
-    		            android:layout_height="16dp"
+    		            android:layout_width="wrap_content"
+    		            android:layout_height="wrap_content"
     		            android:layout_gravity="center_vertical|right"
     		            android:layout_marginLeft="30dp"
     		            android:background="@drawable/btnserch"
     		            android:gravity="right" />
 
     		    </TableRow>
+    		    
+    		    <Space android:layout_width="match_parent" android:layout_height="30dp"/>
 
     		    <TableRow
     		        android:id="@+id/tableRow3"
@@ -97,6 +107,7 @@
 
     		    </TableRow>
 
+    		    <Space android:layout_width="match_parent" android:layout_height="15dp"/>
     		    
     		    <TableRow
     		        android:id="@+id/tableRow4"
@@ -117,6 +128,8 @@
     		            android:text="ChargeName" />
 
    		        </TableRow>
+   		        
+    		    <Space android:layout_width="match_parent" android:layout_height="15dp"/>
 
     		    <TableRow
     		        android:id="@+id/tableRow5"
@@ -136,6 +149,8 @@
     		            android:text="ContactName" />
     		    </TableRow>
     		    
+    		    <Space android:layout_width="match_parent" android:layout_height="15dp"/>
+    		    
     		    <TableRow
     		        android:id="@+id/tableRow6"
     		        android:layout_width="wrap_content"
@@ -153,6 +168,8 @@
     		            android:layout_height="wrap_content"
     		            android:text="DateName" />
     		    </TableRow>
+    		    
+    		    <Space android:layout_width="match_parent" android:layout_height="15dp"/>
     		    
     		    <TableRow
     		        android:id="@+id/tableRow7"

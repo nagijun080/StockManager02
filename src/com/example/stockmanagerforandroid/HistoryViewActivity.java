@@ -6,8 +6,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class ItemViewActivity extends Activity {
+public class HistoryViewActivity extends Activity {
 
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
@@ -49,5 +50,4 @@ public class ItemViewActivity extends Activity {
 	    }
 	    return false;
 	}
-	
 }

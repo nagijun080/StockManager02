@@ -20,36 +20,42 @@ public final class R {
         public static final int imglogin=0x7f020006;
         public static final int imgloginback=0x7f020007;
         public static final int imgtabback=0x7f020008;
+        public static final int tab_client=0x7f020009;
+        public static final int tab_item=0x7f02000a;
+        public static final int tab_mail=0x7f02000b;
     }
     public static final class id {
-        public static final int addressName=0x7f070015;
-        public static final int addressView=0x7f070013;
-        public static final int chargeName=0x7f07000b;
-        public static final int chargeNameView=0x7f07000a;
-        public static final int companyName=0x7f070008;
-        public static final int contactName=0x7f07000e;
-        public static final int contactNameView=0x7f07000d;
-        public static final int dateName=0x7f070011;
-        public static final int dateNameView=0x7f070010;
+        public static final int addressName=0x7f070016;
+        public static final int addressView=0x7f070014;
+        public static final int button=0x7f070003;
+        public static final int chargeName=0x7f07000c;
+        public static final int chargeNameView=0x7f07000b;
+        public static final int companyName=0x7f070009;
+        public static final int contactName=0x7f07000f;
+        public static final int contactNameView=0x7f07000e;
+        public static final int dateName=0x7f070012;
+        public static final int dateNameView=0x7f070011;
         public static final int editText1=0x7f070002;
-        public static final int guestName=0x7f070004;
-        public static final int login=0x7f070019;
-        public static final int loginButton=0x7f07001a;
-        public static final int menu_settings=0x7f07001b;
-        public static final int nameView=0x7f070007;
-        public static final int networkSwitch=0x7f070018;
+        public static final int guestName=0x7f070005;
+        public static final int itemList=0x7f07001d;
+        public static final int login=0x7f07001a;
+        public static final int loginButton=0x7f07001b;
+        public static final int nameView=0x7f070008;
+        public static final int networkSwitch=0x7f070019;
+        public static final int ownerData=0x7f07001c;
+        public static final int ownerHistory=0x7f07001e;
         public static final int ownerNumber=0x7f070001;
-        public static final int password=0x7f070016;
-        public static final int passwordView=0x7f070017;
-        public static final int postName=0x7f070014;
-        public static final int serchButton=0x7f070005;
+        public static final int password=0x7f070017;
+        public static final int passwordView=0x7f070018;
+        public static final int postName=0x7f070015;
+        public static final int serchButton=0x7f070006;
         public static final int tableRow1=0x7f070000;
-        public static final int tableRow2=0x7f070003;
-        public static final int tableRow3=0x7f070006;
-        public static final int tableRow4=0x7f070009;
-        public static final int tableRow5=0x7f07000c;
-        public static final int tableRow6=0x7f07000f;
-        public static final int tableRow7=0x7f070012;
+        public static final int tableRow2=0x7f070004;
+        public static final int tableRow3=0x7f070007;
+        public static final int tableRow4=0x7f07000a;
+        public static final int tableRow5=0x7f07000d;
+        public static final int tableRow6=0x7f070010;
+        public static final int tableRow7=0x7f070013;
     }
     public static final class layout {
         public static final int clientview_layout=0x7f030000;
@@ -57,21 +63,25 @@ public final class R {
         public static final int login_layout=0x7f030002;
     }
     public static final class menu {
-        public static final int login_layout=0x7f060000;
+        public static final int menu_layout=0x7f060000;
     }
     public static final class string {
         public static final int address_name=0x7f04000a;
         public static final int app_name=0x7f040000;
         public static final int charge_name=0x7f040007;
         public static final int contact_name=0x7f040008;
+        public static final int data_list=0x7f04000f;
         public static final int date_name=0x7f040009;
         public static final int guest_name=0x7f040005;
         public static final int guest_setting=0x7f04000c;
         public static final int menu_settings=0x7f040002;
         public static final int name=0x7f040006;
+        public static final int owner_history=0x7f040010;
         public static final int owner_number=0x7f040004;
+        public static final int owner_setting=0x7f04000e;
         public static final int password=0x7f040001;
         public static final int title_client_view_activity=0x7f04000b;
+        public static final int title_history_view_activity=0x7f040011;
         public static final int title_item_view_activity=0x7f04000d;
         public static final int title_login_activity=0x7f040003;
     }

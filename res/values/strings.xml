@@ -14,5 +14,9 @@
     <string name="title_client_view_activity">ClientViewActivity</string>
     <string name="guest_setting">お客様設定</string>
     <string name="title_item_view_activity">ItemViewActivity</string>
+    <string name="owner_setting">発注設定</string>
+    <string name="data_list">商品一覧</string>
+    <string name="owner_history">発注履歴</string>
+    <string name="title_history_view_activity">HistoryViewActivity</string>
 
 </resources>

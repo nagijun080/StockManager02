@@ -28,11 +28,6 @@ public class LoginActivity extends Activity {
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.login_layout, menu);
-        return true;
-    }
     //loginButtonを押した時にパスワードをチェックして
     //ClientViewActivityに遷移する
     public void passwordCheck() {

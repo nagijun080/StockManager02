@@ -5,9 +5,12 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -55,6 +58,36 @@ public class ClientViewActivity extends Activity {
 		serchButton.setOnClickListener(new OnClickListener() {
 			//serchButtonを押したらDialogが表示される
 			public void onClick(View v) {
+				Log.d("serchButton.onClick()", "01");
+				// TODO 自動生成されたメソッド・スタブ
+				dialog = new AlertDialog.Builder(ClientViewActivity.this);
+				dialog.setTitle(R.string.guest_name);
+				//ダイアログが表示されてお客様設定ボタンが押された時の処理
+				//layoutにuserIdのお客様の情報を表示
+				dialog.setPositiveButton(R.string.guest_setting, new DialogInterface.OnClickListener() {
+					
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO 自動生成されたメソッド・スタブ
+						for (int i = 0;i < userDataId.length;i++) {
+							TextView text = (TextView)findViewById(userDataId[i]);
+							text.setText(USERDATA[i][userId]);
+						}
+					}
+				});
+				//listViewを生成して、セッティングをする
+				listViewSetting();
+				dialog.setView(listView);
+				dialog.create();
+				dialog.show();
+			}
+		});
+		
+		Button button = (Button)findViewById(R.id.button);
+		button.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+				Log.d("serchButton.onClick()", "01");
 				// TODO 自動生成されたメソッド・スタブ
 				dialog = new AlertDialog.Builder(ClientViewActivity.this);
 				dialog.setTitle(R.string.guest_name);
@@ -116,6 +149,36 @@ public class ClientViewActivity extends Activity {
 			
 		});
 	}*/
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// TODO 自動生成されたメソッド・スタブ
+		super.onCreateOptionsMenu(menu);
+		getMenuInflater().inflate(R.menu.menu_layout, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	    case R.id.ownerData:
+	    	Intent clientIntent = new Intent();
+    		clientIntent.setClass(this, ClientViewActivity.class);
+    		startActivity(clientIntent);
+	        return true;
+	    case R.id.itemList:
+	    	Intent itemViewIntent = new Intent();
+    		itemViewIntent.setClass(this, ItemViewActivity.class);
+    		startActivity(itemViewIntent);
+	        return true;
+	    case R.id.ownerHistory:
+	    	Intent historyViewIntent = new Intent();
+	    	historyViewIntent.setClass(this, HistoryViewActivity.class);
+	    	startActivity(historyViewIntent);
+	    	return true;
+	    }
+	    return false;
+	}
 	
 
 }
