@@ -39,13 +39,6 @@
 		        </EditText>
 		    </TableRow>
 
-		    <Button
-		        android:id="@+id/button"
-		        style="?android:attr/buttonStyleSmall"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="Button" />
-
 	    </LinearLayout>
     	<LinearLayout
             android:layout_width="match_parent"
@@ -65,12 +58,12 @@
     		        android:id="@+id/tableRow2"
     		        android:layout_width="match_parent"
     		        android:layout_height="match_parent" 
-    		        android:layout_marginTop="15dp">
+    		        android:layout_marginTop="5dp">
     		        <TextView
 	    			    android:id="@+id/guestName"
 	    			    android:layout_width="wrap_content"
 	    			    android:layout_height="wrap_content"
-	    			    android:layout_gravity="center_vertical"
+	    			    android:layout_gravity="center_vertical|left"
 	    			    android:layout_marginLeft="10dp"
 	    			    android:text="@string/guest_name"/>
 
@@ -79,13 +72,13 @@
     		            android:layout_width="wrap_content"
     		            android:layout_height="wrap_content"
     		            android:layout_gravity="center_vertical|right"
-    		            android:layout_marginLeft="30dp"
+    		            android:layout_marginLeft="15dp"
     		            android:background="@drawable/btnserch"
     		            android:gravity="right" />
 
     		    </TableRow>
     		    
-    		    <Space android:layout_width="match_parent" android:layout_height="30dp"/>
+    		    <Space android:layout_width="match_parent" android:layout_height="20dp"/>
 
     		    <TableRow
     		        android:id="@+id/tableRow3"
@@ -107,7 +100,7 @@
 
     		    </TableRow>
 
-    		    <Space android:layout_width="match_parent" android:layout_height="15dp"/>
+    		    <Space android:layout_width="match_parent" android:layout_height="10dp"/>
     		    
     		    <TableRow
     		        android:id="@+id/tableRow4"
@@ -129,7 +122,7 @@
 
    		        </TableRow>
    		        
-    		    <Space android:layout_width="match_parent" android:layout_height="15dp"/>
+    		    <Space android:layout_width="match_parent" android:layout_height="10dp"/>
 
     		    <TableRow
     		        android:id="@+id/tableRow5"
@@ -149,7 +142,7 @@
     		            android:text="ContactName" />
     		    </TableRow>
     		    
-    		    <Space android:layout_width="match_parent" android:layout_height="15dp"/>
+    		    <Space android:layout_width="match_parent" android:layout_height="10dp"/>
     		    
     		    <TableRow
     		        android:id="@+id/tableRow6"
@@ -169,7 +162,7 @@
     		            android:text="DateName" />
     		    </TableRow>
     		    
-    		    <Space android:layout_width="match_parent" android:layout_height="15dp"/>
+    		    <Space android:layout_width="match_parent" android:layout_height="10dp"/>
     		    
     		    <TableRow
     		        android:id="@+id/tableRow7"
@@ -196,8 +189,11 @@
 	    		        <TextView
 	    		            android:id="@+id/addressName"
 	    		            android:layout_width="wrap_content"
-	    		            android:layout_height="wrap_content"
+	    		            android:layout_height="match_parent"
+	    		            android:lines="3"
+	    		            android:singleLine="false"
 	    		            android:text="AddressName" />
+
     		        </LinearLayout>
 
     		    </TableRow>

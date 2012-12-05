@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,7 +36,7 @@ public class ClientViewActivity extends Activity {
 								{"092-475-8639", "092-457-8342"},
 								{"毎月20日", "毎月20日"},
 								{"812-8639", "812-0043"},
-								{"福岡市博多区堅粕３丁目１６番３６号", "福岡市博多区堅粕３丁目１６番１４号"}};
+								{"福岡市博多区堅粕３丁目１６番１４号", "福岡市博多区堅粕３丁目１６番１６号"}};
 	//ここまで配列で、今後SQLite
 	
 	//お客様を識別するID
@@ -71,6 +72,14 @@ public class ClientViewActivity extends Activity {
 						for (int i = 0;i < userDataId.length;i++) {
 							TextView text = (TextView)findViewById(userDataId[i]);
 							text.setText(USERDATA[i][userId]);
+							if (i == 5 && USERDATA[5][userId].length() > 11) {
+								String textBreakFi = USERDATA[5][userId].substring(0, 9);
+								String textBreakSe = USERDATA[5][userId].substring(9);
+								Log.d("textBreakSe", textBreakSe);
+								textBreakFi = textBreakFi + "\n" + textBreakSe;
+								Log.d("textBreak", textBreakFi);
+								text.setText(textBreakFi);
+							}
 						}
 					}
 				});
@@ -80,38 +89,9 @@ public class ClientViewActivity extends Activity {
 				dialog.create();
 				dialog.show();
 			}
-		});
-		
-		Button button = (Button)findViewById(R.id.button);
-		button.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View v) {
-				// TODO 自動生成されたメソッド・スタブ
-				Log.d("serchButton.onClick()", "01");
-				// TODO 自動生成されたメソッド・スタブ
-				dialog = new AlertDialog.Builder(ClientViewActivity.this);
-				dialog.setTitle(R.string.guest_name);
-				//ダイアログが表示されてお客様設定ボタンが押された時の処理
-				//layoutにuserIdのお客様の情報を表示
-				dialog.setPositiveButton(R.string.guest_setting, new DialogInterface.OnClickListener() {
-					
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO 自動生成されたメソッド・スタブ
-						for (int i = 0;i < userDataId.length;i++) {
-							TextView text = (TextView)findViewById(userDataId[i]);
-							text.setText(USERDATA[i][userId]);
-						}
-					}
-				});
-				//listViewを生成して、セッティングをする
-				listViewSetting();
-				dialog.setView(listView);
-				dialog.create();
-				dialog.show();
-			}
-			
 		});
 	}
+	
 
 	@Override
 	protected void onStop() {
