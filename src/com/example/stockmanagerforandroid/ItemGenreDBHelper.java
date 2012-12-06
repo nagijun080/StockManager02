@@ -5,13 +5,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class ItemDBHelper extends SQLiteOpenHelper {
+public class ItemGenreDBHelper extends SQLiteOpenHelper {
 
-	private static final String DATABASE_NAME = "itemDatabase.db";
+	private static final String DATABASE_NAME = "itemGenreDB.db";
 	private static final int DATABASE_VERSION = 1;
-	private static ItemDBHelper itemDBHelper;
+	private static ItemGenreDBHelper itemGenreDBHelper;
 	
-	public ItemDBHelper(Context context) {
+	public ItemGenreDBHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		// TODO 自動生成されたコンストラクター・スタブ
 	}
@@ -19,9 +19,10 @@ public class ItemDBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		// TODO 自動生成されたメソッド・スタブ
-		String sql = "CREATE TABLE itemDB ( _ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-											+ " itemId INTEGER, itemName TEXT, itemValue INTEGER, itemData TEXT, genre TEXT);";
+		String sql = "CREATE TABLE itemGenreDB ( _ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+				+ " genre TEXT, itemValue INTEGER);";
 		db.execSQL(sql);
+		
 	}
 
 	@Override

@@ -33,6 +33,8 @@ public final class R {
         public static final int tab_mail=0x7f020013;
     }
     public static final class id {
+        public static final int TableRow01=0x7f070025;
+        public static final int TableRow02=0x7f070022;
         public static final int addressName=0x7f070015;
         public static final int addressView=0x7f070013;
         public static final int chargeName=0x7f07000b;
@@ -43,27 +45,31 @@ public final class R {
         public static final int dateName=0x7f070011;
         public static final int dateNameView=0x7f070010;
         public static final int editText1=0x7f070002;
+        public static final int genreView=0x7f07001a;
+        public static final int genruButton=0x7f07001b;
         public static final int guestName=0x7f070004;
         public static final int imageList=0x7f070018;
-        public static final int imageView=0x7f07001a;
+        public static final int imageView=0x7f070028;
         public static final int imageView1=0x7f070017;
         public static final int imageView2=0x7f070016;
         public static final int imageView3=0x7f070019;
-        public static final int itemData=0x7f07001c;
-        public static final int itemList=0x7f070025;
-        public static final int itemName=0x7f07001b;
-        public static final int itemValue=0x7f07001d;
-        public static final int login=0x7f070021;
-        public static final int loginButton=0x7f070022;
-        public static final int menu_settings=0x7f070023;
+        public static final int itemData=0x7f07002a;
+        public static final int itemList=0x7f070033;
+        public static final int itemName=0x7f070029;
+        public static final int itemValue=0x7f07002b;
+        public static final int login=0x7f07002f;
+        public static final int loginButton=0x7f070030;
+        public static final int menu_settings=0x7f070031;
         public static final int nameView=0x7f070007;
-        public static final int networkSwitch=0x7f070020;
-        public static final int ownerData=0x7f070024;
-        public static final int ownerHistory=0x7f070026;
+        public static final int networkSwitch=0x7f07002e;
+        public static final int ownerData=0x7f070032;
+        public static final int ownerHistory=0x7f070034;
         public static final int ownerNumber=0x7f070001;
-        public static final int password=0x7f07001e;
-        public static final int passwordView=0x7f07001f;
+        public static final int password=0x7f07002c;
+        public static final int passwordView=0x7f07002d;
         public static final int postName=0x7f070014;
+        public static final int rowButton=0x7f070024;
+        public static final int rowView=0x7f070023;
         public static final int serchButton=0x7f070005;
         public static final int tableRow1=0x7f070000;
         public static final int tableRow2=0x7f070003;
@@ -72,6 +78,14 @@ public final class R {
         public static final int tableRow5=0x7f07000c;
         public static final int tableRow6=0x7f07000f;
         public static final int tableRow7=0x7f070012;
+        public static final int term1=0x7f07001c;
+        public static final int term2=0x7f070020;
+        public static final int term3=0x7f070026;
+        public static final int termGenre=0x7f07001d;
+        public static final int termRow=0x7f070027;
+        public static final int termValue=0x7f070021;
+        public static final int valueButton=0x7f07001f;
+        public static final int valueView=0x7f07001e;
     }
     public static final class layout {
         public static final int clientview_layout=0x7f030000;

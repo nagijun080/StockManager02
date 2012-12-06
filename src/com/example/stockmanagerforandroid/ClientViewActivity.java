@@ -72,6 +72,7 @@ public class ClientViewActivity extends Activity {
 						for (int i = 0;i < userDataId.length;i++) {
 							TextView text = (TextView)findViewById(userDataId[i]);
 							text.setText(USERDATA[i][userId]);
+							//ZŠ‚ª10•¶ŽšˆÈã‚¾‚Á‚½‚ç‰üs‚µ‚Ä•\Ž¦
 							if (i == 5 && USERDATA[5][userId].length() > 11) {
 								String textBreakFi = USERDATA[5][userId].substring(0, 9);
 								String textBreakSe = USERDATA[5][userId].substring(9);

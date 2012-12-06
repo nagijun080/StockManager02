@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -12,11 +14,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
-public class ItemViewActivity extends Activity {
+public class ItemViewActivity extends Activity implements OnClickListener, DialogInterface.OnClickListener{
 
 	//macの商品画像ID配列
 	public Integer[] itemId = { R.drawable.imac_215, R.drawable.imac_27,
@@ -32,13 +39,33 @@ public class ItemViewActivity extends Activity {
 	public String[] itemData = { "クアッドコアIntel Core i5", "クアッドコアIntel Core i5",
 								"デュアルコアA5チップ", "デュアルコアA5チップ",
 								"デュアルコアIntel Core i7", "デュアルコアIntel Core i7",	};
+	//商品のジャンル配列
+	public String[] genre = { "なし", "DeskTop", "Tablet", "NoteBook" };
 	
 	ItemDBHelper itemDBH;
+	
+	//商品を検索するボタン
+	public ImageButton genreButton;
+	public ImageButton valueButton;
+	public ImageButton rowButton;
+	//商品を検索するボタンをクリックしたらダイアログを表示するインスタンス
+	public AlertDialog.Builder genreDialog;
+	public AlertDialog.Builder valueDialog;
+	public AlertDialog.Builder rowDialog;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
 		super.onCreate(savedInstanceState);		
 		setContentView(R.layout.item_view_layout);
+		
+		//商品を検索するボタンにクリックリスナー登録する
+		genreButton = (ImageButton)findViewById(R.id.genruButton);
+		genreButton.setOnClickListener(this);
+		valueButton = (ImageButton)findViewById(R.id.valueButton);
+		valueButton.setOnClickListener(this);
+		rowButton = (ImageButton)findViewById(R.id.rowButton);
+		rowButton.setOnClickListener(this);
+		
 		saveItemDB();
 		showItemDB();
 	}
@@ -90,6 +117,16 @@ public class ItemViewActivity extends Activity {
 			values.put("itemName", itemName[i]);
 			values.put("itemValue", itemValue[i]);
 			values.put("itemData", itemData[i]);
+			//itemName[0]とitemName[1]がgenre[1]
+			//itemName[2]とitemName[3]がgenre[2]
+			//itemName[4]とitemName[5]がgenre[3]
+			if (itemName[0].equals(itemName[i]) || itemName[1].equals(itemName[i])) {
+				values.put("genre", genre[1]);
+			} else if (itemName[2].equals(itemName[i]) || itemName[3].equals(itemName[i])) {
+				values.put("genre", genre[2]);
+			} else if (itemName[4].equals(itemName[i]) || itemName[5].equals(itemName[i])) {
+				values.put("genre", genre[3]);
+			}
 			db.insertOrThrow("itemDB", null, values);
 			itemDBH.close();
 		}
@@ -138,6 +175,22 @@ public class ItemViewActivity extends Activity {
 		
 		ItemCustomAdapter itemCurAda = new ItemCustomAdapter(this, 0, objects);
 		listView1.setAdapter(itemCurAda);
+	}
+	//商品を検索するボタンをクリックしたらダイアログを表示する
+	public void onClick(View view) {
+		// TODO 自動生成されたメソッド・スタブ
+		Button button = (Button)view;
+		if (genreButton.equals(button)) {
+			//ジャンルボタンを押した時の処理
+			//商品データベースからジャンルを取り出す
+			
+		}
+	}
+	
+	//ダイアログの中にあるボタンの処理
+	public void onClick(DialogInterface dialog, int which) {
+		// TODO 自動生成されたメソッド・スタブ
+		
 	}
 	
 }
