@@ -1,5 +1,8 @@
 package com.example.stockmanagerforandroid;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -9,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
@@ -34,9 +38,9 @@ public class ItemViewActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
 		super.onCreate(savedInstanceState);		
+		setContentView(R.layout.item_view_layout);
 		saveItemDB();
 		showItemDB();
-		setContentView(R.layout.item_view_layout);
 	}
 
 	@Override
@@ -95,15 +99,45 @@ public class ItemViewActivity extends Activity {
 	public void showItemDB() {
 		Log.d("showItemDB()","11");
 		SQLiteDatabase db = itemDBH.getWritableDatabase();
-		ListView listView1 = (ListView)findViewById(R.id.imageList1);
-		String[] colmns = { "itemId", "itemName", "_ID", "itemData" };
+		ListView listView1 = (ListView)findViewById(R.id.imageList);
+		String[] colmns = { "itemId", "itemName", "itemValue", "itemData" };
 		Cursor c = db.query("itemDB", colmns, null, null, null, null, null);
 		c.moveToFirst();
 		Log.d("showItemDB()","12" + c.getString(1));
+		//商品の情報が全部入った２次元配列
+		String[][] item = new String[c.getCount()][colmns.length];
+		for (int i = 0;i < c.getCount();i++) {
+			for (int j = 0;j < colmns.length;j++) {
+				item[i][j] = c.getString(j);
+			}
+			c.moveToNext();
+		}
+		//データの作成
+		List<CustomData> objects = new ArrayList<CustomData>();
+		for (int i = 0;i < c.getCount();i++) {
+			CustomData customItem = new CustomData();
+			for (int j = 0;j < colmns.length;j++) {
+				switch (j) {
+				case 0:
+					customItem.setItemId(Integer.valueOf(item[i][j]));
+					break;
+				case 1:
+					customItem.setItemName(item[i][j]);
+					break;
+				case 2:
+					customItem.setItemValue(Integer.valueOf(item[i][j]));
+					break;
+				case 3:
+					customItem.setItemData(item[i][j]);
+					break;
+				}
+			}
+			objects.add(customItem);
+		}
+		c.close();
 		
-		/*ItemCursorAdapter itemCA = new ItemCursorAdapter(this, R.layout.list_item, c, colmns, 
-				new int[] { R.id.imageView, R.id.itemName, R.id.itemValue, R.id.itemData, }, 0);
-		listView1.setAdapter(itemCA);*/
+		ItemCustomAdapter itemCurAda = new ItemCustomAdapter(this, 0, objects);
+		listView1.setAdapter(itemCurAda);
 	}
 	
 }
