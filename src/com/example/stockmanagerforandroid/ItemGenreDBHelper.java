@@ -30,5 +30,6 @@ public class ItemGenreDBHelper extends SQLiteOpenHelper {
 		// TODO 自動生成されたメソッド・スタブ
 
 	}
+	
 
 }
