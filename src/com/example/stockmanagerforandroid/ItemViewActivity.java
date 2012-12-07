@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -68,6 +69,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	private final int GENRE = 0;
 	private final int VALUE = 1;
 	private final int ROW = 2;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
@@ -81,8 +83,9 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		valueButton.setOnClickListener(this);
 		rowButton = (ImageButton)findViewById(R.id.rowButton);
 		rowButton.setOnClickListener(this);
-		
+		//itemDBにデータを入れる
 		saveItemDB();
+		
 		//itemDBテーブルのデータベースに入っているデータを全部出す
 		showItemDB(null, null);
 	}
@@ -125,9 +128,10 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	//ItemDBHelperのitemDBテーブルにinsertする
 	public void saveItemDB() {
 		Log.d("saveItemDB()","first");
-		for (int i = 0;i < itemId.length;i++) {	
-			itemDBH = new ItemDBHelper(this);
-			SQLiteDatabase db = itemDBH.getWritableDatabase();
+		itemDBH = new ItemDBHelper(this);
+		SQLiteDatabase db = itemDBH.getWritableDatabase();
+		
+		for (int i = 0;i < itemId.length;i++) {				
 			Log.d("saveItemDB()","0" + i);
 			ContentValues values = new ContentValues();
 			values.put("itemId", itemId[i]);
@@ -148,17 +152,27 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				values.put("genre", genre[3]);
 				Log.d("itemName[4or5}", itemName[i]);
 			}
-			db.insertOrThrow("itemDB", null, values);
-			Log.d("saveItemDB()", "insert end");
-			itemDBH.close();
+			Cursor cur = db.query("itemDB", new String[] { "itemId" }, "itemId = ?", new String[] { itemId[i].toString(), }, null, null, null);
+			cur.moveToFirst();
+			
+			Integer checkRec = null;
+			if (cur.getString(0).equals(itemId[i])) {
+				checkRec = (Integer)db.update("itemDB", values, "itemId = ?", new String[] { itemId[i].toString(), });
+				Log.d("db.update","checkRec : " + String.valueOf(checkRec));
+			} else {
+				checkRec = Long.valueOf(db.insert("itemDB", null, values)).intValue();				
+				Log.d("db.insert","checkIns : " + String.valueOf(checkRec));
+			}
+			cur.moveToNext();
 		}
+		itemDBH.close();
 	}
 	
 	//itemDBテーブルから商品を取り出して、表示
 	//引数:select  
 	public void showItemDB(String select, String[] selectArgs) {
 		SQLiteDatabase db = itemDBH.getWritableDatabase();
-		ListView listView1 = (ListView)findViewById(R.id.imageList);
+		ListView imageList = (ListView)findViewById(R.id.imageList);
 		String[] colmns = { "itemId", "itemName", "itemValue", "itemData", "genre"};
 		Cursor c = db.query("itemDB", colmns, select, selectArgs, null, null, null);
 		c.moveToFirst();
@@ -198,7 +212,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		c.close();
 		
 		ItemCustomAdapter itemCurAda = new ItemCustomAdapter(this, 0, objects);
-		listView1.setAdapter(itemCurAda);
+		imageList.setAdapter(itemCurAda);
 	}
 	//Dialogを表示するボタンの処理
 	public void onClick(View view) {
@@ -225,6 +239,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			Log.d("Dailog in Button", String.valueOf(genreId));
 			if (genreId == 0) {
 				select = null;
+				selectArgs = null;
 			}
 			showItemDB(select, selectArgs);
 		}
@@ -268,11 +283,13 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 					long id) {
 				//選択された項目の場所を取得
 				genreId = position;
-				Toast.makeText(ItemViewActivity.this, "list position" + position, Toast.LENGTH_LONG).show();
+				Toast.makeText(ItemViewActivity.this, "list position" + position, Toast.LENGTH_SHORT).show();
 			}
 		});
 		genreDialog.setView(listView);
 		genreDialog.create();
 		genreDialog.show();
 	}
+	
+	
 }

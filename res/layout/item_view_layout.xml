@@ -71,13 +71,14 @@
  -->
  
 		 <ListView
-            android:id="@+id/imageList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="50dp"
-            android:layout_marginLeft="150dp"
-            android:layout_marginRight="50dp"
-            android:layout_marginTop="90dp" >
+		     android:id="@+id/imageList"
+		     android:layout_width="match_parent"
+		     android:layout_height="match_parent"
+		     android:layout_marginBottom="50dp"
+		     android:layout_marginLeft="150dp"
+		     android:layout_marginRight="50dp"
+		     android:layout_marginTop="90dp" >
+
          </ListView>        <!-- タブレット1280✕800 -->
         <!-- <ImageView
             android:id="@+id/imageView3"
@@ -93,7 +94,7 @@
                android:id="@+id/imageView3"
                android:layout_width="wrap_content"
                android:layout_height="match_parent"
-               android:layout_marginBottom="295dp"
+               android:layout_marginBottom="290dp"
                android:paddingTop="-150dp"
                android:scaleType="centerCrop"
                android:src="@drawable/img_tack" />
@@ -108,12 +109,14 @@
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content"
                    android:layout_marginLeft="10dp"
-                   android:layout_marginRight="10dp" >
+                   android:layout_marginRight="10dp"
+                   android:layout_marginTop="8dp" >
 
                    <TableRow
                        android:id="@+id/tableRow1"
                        android:layout_width="wrap_content"
-                       android:layout_height="wrap_content" >
+                       android:layout_height="match_parent"
+                       android:layout_weight="1" >
 
                        <TextView
                            android:id="@+id/genreView"
@@ -137,14 +140,8 @@
                    <TableRow
                        android:id="@+id/tableRow2"
                        android:layout_width="wrap_content"
-                       android:layout_height="wrap_content" >
-
-                       <TextView
-                           android:id="@+id/term1"
-                           android:layout_width="wrap_content"
-                           android:layout_height="wrap_content"
-                           android:layout_weight="2"
-                           android:text="条件 :" />
+                       android:layout_height="match_parent"
+                       android:layout_weight="1" >
 
                        <TextView
                            android:id="@+id/termGenre"
@@ -155,14 +152,19 @@
 
                    </TableRow>
 
+                   <Space
+                       android:layout_width="wrap_content"
+                       android:layout_height="12dp" />
+
                    <TableRow
                        android:id="@+id/tableRow3"
                        android:layout_width="wrap_content"
-                       android:layout_height="wrap_content" >
+                       android:layout_height="match_parent"
+                       android:layout_weight="1" >
 
                        <TextView
                            android:id="@+id/valueView"
-                           android:layout_width="wrap_content"
+                           android:layout_width="match_parent"
                            android:layout_height="wrap_content"
                            android:layout_gravity="left|center_vertical"
                            android:layout_weight="2"
@@ -182,14 +184,8 @@
                    <TableRow
                        android:id="@+id/tableRow4"
                        android:layout_width="wrap_content"
-                       android:layout_height="wrap_content" >
-
-                       <TextView
-                           android:id="@+id/term2"
-                           android:layout_width="wrap_content"
-                           android:layout_height="wrap_content"
-                           android:layout_weight="2"
-                           android:text="条件 :" />
+                       android:layout_height="match_parent"
+                       android:layout_weight="1" >
 
                        <TextView
                            android:id="@+id/termValue"
@@ -199,22 +195,27 @@
                            android:text="TextView" />
 
                    </TableRow>
+
+                   <Space
+                       android:layout_width="wrap_content"
+                       android:layout_height="11dp" />
                    
                    <TableRow
-                       android:id="@+id/TableRow02"
+                       android:id="@+id/TableRow5"
                        android:layout_width="wrap_content"
-                       android:layout_height="wrap_content" >
+                       android:layout_height="match_parent"
+                       android:layout_weight="1" >
 
                        <TextView
                            android:id="@+id/rowView"
-                           android:layout_width="wrap_content"
+                           android:layout_width="match_parent"
                            android:layout_height="wrap_content"
                            android:layout_gravity="left|center_vertical"
                            android:layout_weight="2"
                            android:lines="2"
                            android:text="商品並びを変更する"
                            android:textSize="12sp" />
-
+                       
                        <ImageButton
                            android:id="@+id/rowButton"
                            android:layout_width="wrap_content"
@@ -225,16 +226,10 @@
                    </TableRow>
 
                    <TableRow
-                       android:id="@+id/TableRow01"
+                       android:id="@+id/TableRow6"
                        android:layout_width="wrap_content"
-                       android:layout_height="wrap_content" >
-
-                       <TextView
-                           android:id="@+id/term3"
-                           android:layout_width="wrap_content"
-                           android:layout_height="wrap_content"
-                           android:layout_weight="2"
-                           android:text="条件 :" />
+                       android:layout_height="match_parent"
+                       android:layout_weight="1" >
 
                        <TextView
                            android:id="@+id/termRow"

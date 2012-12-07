@@ -19,7 +19,8 @@
             <ImageView
                 android:id="@+id/imageView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="100dp"
+                android:layout_weight="1"
                 android:src="@drawable/btnkey" />
 
         </LinearLayout>
@@ -35,6 +36,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:lines="3"
                 android:text="itemName" />
 
             <TextView
@@ -42,6 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:lines="3"
                 android:text="itemData" />
 
             <TextView
@@ -49,6 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:lines="3"
                 android:text="itemValue" />
 
         </LinearLayout>
