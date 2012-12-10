@@ -5,22 +5,31 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -49,6 +58,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	ItemGenreDBHelper itemGenreDBH;
 	
 	public ArrayAdapter<String> genAdapter;
+	public ArrayAdapter<Integer> valueAdapter;
 	
 	//商品を検索するボタン
 	public ImageButton genreButton;
@@ -56,11 +66,12 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public ImageButton rowButton;
 	//商品を検索するボタンをクリックしたらダイアログを表示するインスタンス
 	public AlertDialog.Builder genreDialog;
-	public AlertDialog.Builder valueDialog;
+	public Builder valueDialog;
 	public AlertDialog.Builder rowDialog;
 	
 	//Dialogのリスト項目ID
 	int genreId;
+	int valueId;
 	
 	//どのダイアログが使われているかチェックする
 	//ダイアログを表示するボタンを押した時に固定値を入れる
@@ -128,8 +139,6 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	//ItemDBHelperのitemDBテーブルにinsertする
 	public void saveItemDB() {
 		Log.d("saveItemDB()","first");
-		itemDBH = new ItemDBHelper(this);
-		SQLiteDatabase db = itemDBH.getWritableDatabase();
 		
 		for (int i = 0;i < itemId.length;i++) {				
 			Log.d("saveItemDB()","0" + i);
@@ -152,25 +161,35 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				values.put("genre", genre[3]);
 				Log.d("itemName[4or5}", itemName[i]);
 			}
-			Cursor cur = db.query("itemDB", new String[] { "itemId" }, "itemId = ?", new String[] { itemId[i].toString(), }, null, null, null);
-			cur.moveToFirst();
 			
-			Integer checkRec = null;
-			if (cur.getString(0).equals(itemId[i])) {
-				checkRec = (Integer)db.update("itemDB", values, "itemId = ?", new String[] { itemId[i].toString(), });
-				Log.d("db.update","checkRec : " + String.valueOf(checkRec));
-			} else {
-				checkRec = Long.valueOf(db.insert("itemDB", null, values)).intValue();				
+			itemDBH = new ItemDBHelper(this);
+			SQLiteDatabase db = itemDBH.getWritableDatabase();
+			Log.d("itemId[i]", itemId[i].toString());
+			Integer checkRec = 0;
+			try  {
+				checkRec = Long.valueOf(db.insertOrThrow("itemDB", null, values)).intValue();
 				Log.d("db.insert","checkIns : " + String.valueOf(checkRec));
+			} catch (SQLiteConstraintException e) {
+				checkRec = db.update("itemDB", values, "itemId = ?", new String[] { itemId[i].toString(), });
+				Log.d("db.update","checkRec : " + String.valueOf(checkRec));
 			}
-			cur.moveToNext();
+			itemDBH.close();
+//			Integer checkRec = null;
+//			if (cur.getString(0).equals(itemId[i])) {
+//				checkRec = (Integer)db.update("itemDB", values, "itemId = ?", new String[] { itemId[i].toString(), });
+//				Log.d("db.update","checkRec : " + String.valueOf(checkRec));
+//			} else {
+//				checkRec = Long.valueOf(db.insert("itemDB", null, values)).intValue();				
+//				Log.d("db.insert","checkIns : " + String.valueOf(checkRec));
+//			}
+//			cur.moveToNext();
 		}
-		itemDBH.close();
 	}
 	
 	//itemDBテーブルから商品を取り出して、表示
-	//引数:select  
-	public void showItemDB(String select, String[] selectArgs) {
+	//引数1:select 条件カラム
+	//引数2:selectArgs　条件カラムに代入する文字列
+	public void showItemDB(String select, String[] selectArgs) throws CursorIndexOutOfBoundsException{
 		SQLiteDatabase db = itemDBH.getWritableDatabase();
 		ListView imageList = (ListView)findViewById(R.id.imageList);
 		String[] colmns = { "itemId", "itemName", "itemValue", "itemData", "genre"};
@@ -216,16 +235,20 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	}
 	//Dialogを表示するボタンの処理
 	public void onClick(View view) {
-		ImageButton button = (ImageButton)view;
 		//商品を検索するボタンをクリックしたらダイアログを表示する		
-		if (genreButton.equals(button)) {
+		if (genreButton.equals(view)) {
 			//ジャンルボタンを押した時の処理
 			checkNum = GENRE;
 			showGenDia();
-		}
+		} else if (valueButton.equals(view)) {
+			//条件を価格ボタンにした時の設定
+			checkNum = VALUE;
+			Log.d("onClick().valueButton","01");
+			showValDia();
+		} 
 	}
 	
-	//ダイアログの中にあるボタンの処理
+	//ダイアログの中にあるボタンの処理(価格設定の時はなし)
 	public void onClick(DialogInterface dialog, int which) {
 		// TODO 自動生成されたメソッド・スタブ
 		//押されたダイアログボタンがジャンルボタンだったとき
@@ -241,7 +264,12 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				select = null;
 				selectArgs = null;
 			}
+			//どのジャンルかtermGenreに表示させる
+			TextView text = (TextView)findViewById(R.id.termGenre);
+			text.setText("条件 : " + genre[genreId]);
 			showItemDB(select, selectArgs);
+		} else if (checkNum == VALUE) {
+			setValView();
 		}
 	}
 	
@@ -283,7 +311,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 					long id) {
 				//選択された項目の場所を取得
 				genreId = position;
-				Toast.makeText(ItemViewActivity.this, "list position" + position, Toast.LENGTH_SHORT).show();
+				Toast.makeText(ItemViewActivity.this, genre[genreId] + "です。", Toast.LENGTH_SHORT).show();
 			}
 		});
 		genreDialog.setView(listView);
@@ -291,5 +319,41 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		genreDialog.show();
 	}
 	
+	private String min;
+	private String max;
+	public View itemValVw;
+	//価格ボタンを押した時の処理
+	/*valueDialogにterm_value_layoutをset*/
+	public void showValDia() {
+		// TODO 自動生成されたメソッド・スタブ
+		Log.d("showValDia()", "01");
+		valueDialog = new AlertDialog.Builder(this);
+		LayoutInflater inflater = LayoutInflater.from(this);
+		itemValVw = inflater.inflate(R.layout.term_value_layout, (ViewGroup)findViewById(R.id.termValueLl));
+		valueDialog.setPositiveButton("価格帯設定", this);
+		valueDialog.setView(itemValVw);
+		
+		valueDialog.create();
+		valueDialog.show();
+	}
+	//価格設定ダイアログで最小値から最大値までをlistViewに表示させる
+	public void setValView() {
+		EditText minEditVw = (EditText)itemValVw.findViewById(R.id.minText);
+		EditText maxEditVw = (EditText)itemValVw.findViewById(R.id.maxText);
+		Log.d("setValView()", minEditVw.getText().toString());
+		min = minEditVw.getText().toString();
+		max = maxEditVw.getText().toString();
+		String select = "itemValue >= ? and itemValue >= ?";
+		String[] selectArgs = { min, max };
+		if (Integer.valueOf(max) <= 0) {
+			select = null;
+			selectArgs = null;
+		}
+		try {			
+			showItemDB(select, selectArgs);
+		} catch (CursorIndexOutOfBoundsException e) {
+			Toast.makeText("", "", "");
+		}
+	}
 	
 }

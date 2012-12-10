@@ -19,18 +19,19 @@ public final class R {
         public static final int imac_215=0x7f020005;
         public static final int imac_27=0x7f020006;
         public static final int img_binder_base_08=0x7f020007;
-        public static final int img_tack=0x7f020008;
-        public static final int imglabel=0x7f020009;
-        public static final int imglogin=0x7f02000a;
-        public static final int imgloginback=0x7f02000b;
-        public static final int imgtabback=0x7f02000c;
-        public static final int ipad_mini_bk=0x7f02000d;
-        public static final int ipad_mini_whi=0x7f02000e;
-        public static final int macbook_13=0x7f02000f;
-        public static final int macbook_13_retina=0x7f020010;
-        public static final int tab_client=0x7f020011;
-        public static final int tab_item=0x7f020012;
-        public static final int tab_mail=0x7f020013;
+        public static final int img_search_back=0x7f020008;
+        public static final int img_tack=0x7f020009;
+        public static final int imglabel=0x7f02000a;
+        public static final int imglogin=0x7f02000b;
+        public static final int imgloginback=0x7f02000c;
+        public static final int imgtabback=0x7f02000d;
+        public static final int ipad_mini_bk=0x7f02000e;
+        public static final int ipad_mini_whi=0x7f02000f;
+        public static final int macbook_13=0x7f020010;
+        public static final int macbook_13_retina=0x7f020011;
+        public static final int tab_client=0x7f020012;
+        public static final int tab_item=0x7f020013;
+        public static final int tab_mail=0x7f020014;
     }
     public static final class id {
         public static final int TableRow5=0x7f070020;
@@ -54,16 +55,20 @@ public final class R {
         public static final int imageView2=0x7f070016;
         public static final int imageView3=0x7f070019;
         public static final int itemData=0x7f070027;
-        public static final int itemList=0x7f070030;
+        public static final int itemList=0x7f070036;
         public static final int itemName=0x7f070026;
         public static final int itemValue=0x7f070028;
         public static final int login=0x7f07002c;
         public static final int loginButton=0x7f07002d;
-        public static final int menu_settings=0x7f07002e;
+        public static final int maxText=0x7f070033;
+        public static final int maxValue=0x7f070032;
+        public static final int menu_settings=0x7f070034;
+        public static final int minText=0x7f070030;
+        public static final int minValue=0x7f07002f;
         public static final int nameView=0x7f070007;
         public static final int networkSwitch=0x7f07002b;
-        public static final int ownerData=0x7f07002f;
-        public static final int ownerHistory=0x7f070031;
+        public static final int ownerData=0x7f070035;
+        public static final int ownerHistory=0x7f070037;
         public static final int ownerNumber=0x7f070001;
         public static final int password=0x7f070029;
         public static final int passwordView=0x7f07002a;
@@ -81,6 +86,8 @@ public final class R {
         public static final int termGenre=0x7f07001c;
         public static final int termRow=0x7f070024;
         public static final int termValue=0x7f07001f;
+        public static final int termValueLl=0x7f07002e;
+        public static final int textView2=0x7f070031;
         public static final int valueButton=0x7f07001e;
         public static final int valueView=0x7f07001d;
     }
@@ -89,6 +96,7 @@ public final class R {
         public static final int item_view_layout=0x7f030001;
         public static final int list_item=0x7f030002;
         public static final int login_layout=0x7f030003;
+        public static final int term_value_layout=0x7f030004;
     }
     public static final class menu {
         public static final int login_layout=0x7f060000;
