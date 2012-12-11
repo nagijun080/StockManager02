@@ -38,6 +38,8 @@ public final class R {
         public static final int TableRow6=0x7f070023;
         public static final int addressName=0x7f070015;
         public static final int addressView=0x7f070013;
+        public static final int alignList=0x7f07002f;
+        public static final int alignLl=0x7f07002e;
         public static final int chargeName=0x7f07000b;
         public static final int chargeNameView=0x7f07000a;
         public static final int companyName=0x7f070008;
@@ -55,20 +57,20 @@ public final class R {
         public static final int imageView2=0x7f070016;
         public static final int imageView3=0x7f070019;
         public static final int itemData=0x7f070027;
-        public static final int itemList=0x7f070036;
+        public static final int itemList=0x7f070038;
         public static final int itemName=0x7f070026;
         public static final int itemValue=0x7f070028;
         public static final int login=0x7f07002c;
         public static final int loginButton=0x7f07002d;
-        public static final int maxText=0x7f070033;
-        public static final int maxValue=0x7f070032;
-        public static final int menu_settings=0x7f070034;
-        public static final int minText=0x7f070030;
-        public static final int minValue=0x7f07002f;
+        public static final int maxText=0x7f070035;
+        public static final int maxValue=0x7f070034;
+        public static final int menu_settings=0x7f070036;
+        public static final int minText=0x7f070032;
+        public static final int minValue=0x7f070031;
         public static final int nameView=0x7f070007;
         public static final int networkSwitch=0x7f07002b;
-        public static final int ownerData=0x7f070035;
-        public static final int ownerHistory=0x7f070037;
+        public static final int ownerData=0x7f070037;
+        public static final int ownerHistory=0x7f070039;
         public static final int ownerNumber=0x7f070001;
         public static final int password=0x7f070029;
         public static final int passwordView=0x7f07002a;
@@ -86,8 +88,8 @@ public final class R {
         public static final int termGenre=0x7f07001c;
         public static final int termRow=0x7f070024;
         public static final int termValue=0x7f07001f;
-        public static final int termValueLl=0x7f07002e;
-        public static final int textView2=0x7f070031;
+        public static final int termValueLl=0x7f070030;
+        public static final int textView2=0x7f070033;
         public static final int valueButton=0x7f07001e;
         public static final int valueView=0x7f07001d;
     }
@@ -96,7 +98,8 @@ public final class R {
         public static final int item_view_layout=0x7f030001;
         public static final int list_item=0x7f030002;
         public static final int login_layout=0x7f030003;
-        public static final int term_value_layout=0x7f030004;
+        public static final int row_layout=0x7f030004;
+        public static final int term_value_layout=0x7f030005;
     }
     public static final class menu {
         public static final int login_layout=0x7f060000;

@@ -16,6 +16,7 @@ import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,7 +47,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			"iPadmini ブラック＆ストレート","iPadmini ホワイト＆シルバー", 
 			"MacBookPro １３インチ", "MacBookPro １３インチ Retina", };
 	//商品の値段配列
-	public Integer[] itemValue = { 128800, 144000, 28800, 28800, 128800, 150000, };
+	public Integer[] itemValue = { 128800, 144000, 28800, 30800, 130000, 150000, };
 	//商品情報配列
 	public String[] itemData = { "クアッドコアIntel Core i5", "クアッドコアIntel Core i5",
 								"デュアルコアA5チップ", "デュアルコアA5チップ",
@@ -70,8 +71,9 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public AlertDialog.Builder rowDialog;
 	
 	//Dialogのリスト項目ID
-	int genreId;
-	int valueId;
+	Integer genreId = 0;
+	Integer valueId;
+	Integer alignId = 0;
 	
 	//どのダイアログが使われているかチェックする
 	//ダイアログを表示するボタンを押した時に固定値を入れる
@@ -81,11 +83,24 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	private final int VALUE = 1;
 	private final int ROW = 2;
 	
+	//itemDBデータベースを使って検索するときの変数
+	public String select;	
+	public String[] selectArgs;
+	public String orderBy;
+	//価格帯設定に使う変数
+	private String min;
+	private String max;
+	public View itemValVw;
+	
+	public View itemRowVw;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
-		super.onCreate(savedInstanceState);		
+		super.onCreate(savedInstanceState);	
+		//LayoutのvalueViewだけ改行処理
 		setContentView(R.layout.item_view_layout);
+		TextView valueV = (TextView)findViewById(R.id.valueView);
+		valueV.setText("価格を\n絞り込む");
 		
 		//商品を検索するボタンにクリックリスナー登録する
 		genreButton = (ImageButton)findViewById(R.id.genruButton);
@@ -98,7 +113,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		saveItemDB();
 		
 		//itemDBテーブルのデータベースに入っているデータを全部出す
-		showItemDB(null, null);
+		showItemDB(null, null, null);
 	}
 
 	@Override
@@ -189,49 +204,54 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	//itemDBテーブルから商品を取り出して、表示
 	//引数1:select 条件カラム
 	//引数2:selectArgs　条件カラムに代入する文字列
-	public void showItemDB(String select, String[] selectArgs) throws CursorIndexOutOfBoundsException{
+	/*genre別に*/
+	public void showItemDB(String select, String[] selectArgs, String orderBy){
 		SQLiteDatabase db = itemDBH.getWritableDatabase();
 		ListView imageList = (ListView)findViewById(R.id.imageList);
 		String[] colmns = { "itemId", "itemName", "itemValue", "itemData", "genre"};
-		Cursor c = db.query("itemDB", colmns, select, selectArgs, null, null, null);
-		c.moveToFirst();
-		Log.d("showItemDB()","12" + c.getString(1));
+		Cursor c = db.query("itemDB", colmns, select, selectArgs, null, null, orderBy);
 		//商品の情報が全部入った２次元配列
 		String[][] item = new String[c.getCount()][colmns.length];
-		for (int i = 0;i < c.getCount();i++) {
-			for (int j = 0;j < colmns.length;j++) {
-				item[i][j] = c.getString(j);
-			}
-			c.moveToNext();
-		}
-		//データの作成
-		List<CustomData> objects = new ArrayList<CustomData>();
-		for (int i = 0;i < c.getCount();i++) {
-			CustomData customItem = new CustomData();
-			for (int j = 0;j < colmns.length;j++) {
-				switch (j) {
-				case 0:
-					customItem.setItemId(Integer.valueOf(item[i][j]));
-					break;
-				case 1:
-					customItem.setItemName(item[i][j]);
-					break;
-				case 2:
-					customItem.setItemValue(Integer.valueOf(item[i][j]));
-					break;
-				case 3:
-					customItem.setItemData(item[i][j]);
-					break;
-				default:
-					break;
+		if (c != null && c.getCount() != 0) {
+			c.moveToFirst();
+			Log.d("showItemDB()","12" + c.getString(1));
+			for (int i = 0;i < c.getCount();i++) {
+				for (int j = 0;j < colmns.length;j++) {
+					item[i][j] = c.getString(j);
 				}
+				c.moveToNext();
 			}
-			objects.add(customItem);
+			//データの作成
+			List<CustomData> objects = new ArrayList<CustomData>();
+			for (int i = 0;i < c.getCount();i++) {
+				CustomData customItem = new CustomData();
+				for (int j = 0;j < colmns.length;j++) {
+					switch (j) {
+					case 0:
+						customItem.setItemId(Integer.valueOf(item[i][j]));
+						break;
+					case 1:
+						customItem.setItemName(item[i][j]);
+						break;
+					case 2:
+						customItem.setItemValue(Integer.valueOf(item[i][j]));
+						break;
+					case 3:
+						customItem.setItemData(item[i][j]);
+						break;
+					default:
+						break;
+					}
+				}
+				objects.add(customItem);
+			}
+			c.close();
+			
+			ItemCustomAdapter itemCurAda = new ItemCustomAdapter(this, 0, objects);
+			imageList.setAdapter(itemCurAda);
+		} else {
+			imageList.setAdapter(null);
 		}
-		c.close();
-		
-		ItemCustomAdapter itemCurAda = new ItemCustomAdapter(this, 0, objects);
-		imageList.setAdapter(itemCurAda);
 	}
 	//Dialogを表示するボタンの処理
 	public void onClick(View view) {
@@ -245,7 +265,11 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			checkNum = VALUE;
 			Log.d("onClick().valueButton","01");
 			showValDia();
-		} 
+		} else if (rowButton.equals(view)) {
+			//商品並びを変えるボタンを押した時の処理
+			checkNum = ROW;
+			showRowDia();
+		}
 	}
 	
 	//ダイアログの中にあるボタンの処理(価格設定の時はなし)
@@ -257,8 +281,16 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			//listViewのどれが選択されたかを取得(genreIdに入っている)
 			//選択された項目のジャンルがあるデータをデータベースから持ってくる
 			//データをlayout.imageListに表示
-			String select = "genre = ?";
-			String[] selectArgs = { genre[genreId], };
+			if (!(min.equals("") && max.equals(""))) {
+				select = "itemValue >= ? and itemValue <= ? and genre = ?";
+				selectArgs = new String[]{ min, max, genre[genreId] };
+			} else if (min.equals("")){
+				select = "itemValue <= ? and genre = ?";
+				selectArgs = new String[]{ max,genre[genreId], };
+			} else if (max.equals("")) {
+				select = "itemValue >= ? and genre = ?";
+				selectArgs = new String[]{ min,genre[genreId], };
+			}
 			Log.d("Dailog in Button", String.valueOf(genreId));
 			if (genreId == 0) {
 				select = null;
@@ -267,9 +299,13 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			//どのジャンルかtermGenreに表示させる
 			TextView text = (TextView)findViewById(R.id.termGenre);
 			text.setText("条件 : " + genre[genreId]);
-			showItemDB(select, selectArgs);
+			showItemDB(select, selectArgs, orderBy);
 		} else if (checkNum == VALUE) {
 			setValView();
+			showItemDB(select, selectArgs, orderBy);
+		} else if (checkNum == ROW) {
+			//商品の並び替えダイアログの中にあるボタンを押した時の処理
+			showItemDB(select,selectArgs,orderBy);
 		}
 	}
 	
@@ -319,9 +355,6 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		genreDialog.show();
 	}
 	
-	private String min;
-	private String max;
-	public View itemValVw;
 	//価格ボタンを押した時の処理
 	/*valueDialogにterm_value_layoutをset*/
 	public void showValDia() {
@@ -336,24 +369,96 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		valueDialog.create();
 		valueDialog.show();
 	}
+	//商品の並び順を変える処理
+	public void showRowDia() {
+		rowDialog = new AlertDialog.Builder(this);
+		LayoutInflater inflater = LayoutInflater.from(this);
+		itemRowVw = inflater.inflate(R.layout.row_layout, (ViewGroup)findViewById(R.id.alignLl));
+		String[] alignListSt = { "なし", "価格順：安い", "価格順：高い", };
+		ArrayAdapter<String> alignAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,alignListSt);
+		rowDialog.setPositiveButton("並び替え設定", this);
+		rowDialog.setView(itemRowVw);
+		ListView alignList = (ListView)itemRowVw.findViewById(R.id.alignList);
+		alignList.setAdapter(alignAdapter);
+		alignList.setBackgroundColor(Color.WHITE);
+		alignList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			//並び順ごとの処理
+			public void onItemClick(AdapterView<?> adapter, View view, int position,
+					long id) {
+				// TODO 自動生成されたメソッド・スタブ
+				alignId = position;
+				switch(position) {
+				case 0://並び順なし
+					orderBy = null;
+					break;
+				case 1://昇順
+					orderBy = "itemValue ASC";
+					break;
+				case 2://降順
+					orderBy = "itemValue DESC";
+					break;
+				}
+			}
+			
+		});
+		
+		TextView alignText = (TextView)findViewById(R.id.termRow);
+		alignText.setText("条件 : " + alignListSt[alignId]);
+		rowDialog.create();
+		rowDialog.show();
+//		//昇順
+//		orderBy = "itemValue ASC";
+//		showItemDB(null,null,orderBy);
+//		TextView orderByText = (TextView)findViewById(R.id.termRow);
+//		orderByText.setText("条件 : 昇順");
+	}
+	
 	//価格設定ダイアログで最小値から最大値までをlistViewに表示させる
+	/*ソート
+	 * min=1000000,max=12
+	 * itemValue>=1000000 and itemValue<=12
+	 * 1000000<=itemValue<=12*/
 	public void setValView() {
+		
 		EditText minEditVw = (EditText)itemValVw.findViewById(R.id.minText);
 		EditText maxEditVw = (EditText)itemValVw.findViewById(R.id.maxText);
 		Log.d("setValView()", minEditVw.getText().toString());
 		min = minEditVw.getText().toString();
 		max = maxEditVw.getText().toString();
-		String select = "itemValue >= ? and itemValue >= ?";
-		String[] selectArgs = { min, max };
-		if (Integer.valueOf(max) <= 0) {
-			select = null;
-			selectArgs = null;
+		
+		//ジャンルがない場合
+		if (genreId == 0) {
+			select = "itemValue >= ? and itemValue <= ?";
+			selectArgs = new String[]{ min, max };
+			//最大値が０または最小値と最大値に未入力
+			//全部表示
+			if (max.equals("0") || min.equals("") && max.equals("")) {
+				select = null;
+				selectArgs = null;
+			} else if (max == null) {
+				//最大値だけ入力されていない
+				select = "itemValue >= ?";
+				selectArgs = new String[] { min, };
+			}
+		} else {
+			//ジャンルがある場合
+			select = "itemValue >= ? and itemValue <= ? and genre = ?";
+			selectArgs = new String[] { min, max, genre[genreId] };
+			//ジャンル項目だけ表示
+			if (max.equals("0") || min.equals("") && max.equals("")) {
+				select = "genre = ?";
+				selectArgs = new String[] { genre[genreId], };;
+			} else if (max.equals("")) {
+				//最大値だけ入力されていない
+				select = "itemValue >= ? and genre = ?";
+				selectArgs = new String[] { min, genre[genreId]};
+			}
 		}
-		try {			
-			showItemDB(select, selectArgs);
-		} catch (CursorIndexOutOfBoundsException e) {
-			Toast.makeText("", "", "");
-		}
+		//textViewに価格がどれだけか表示させる
+		TextView valText = (TextView)findViewById(R.id.termValue);
+		valText.setText("条件 : \n" + min + " ～ " + max);
 	}
 	
+	
 }
+ 
