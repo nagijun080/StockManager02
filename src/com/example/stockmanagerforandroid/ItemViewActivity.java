@@ -88,8 +88,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public String[] selectArgs;
 	public String orderBy;
 	//価格帯設定に使う変数
-	private String min;
-	private String max;
+	private String min = "";
+	private String max = "";
 	public View itemValVw;
 	
 	public View itemRowVw;
@@ -101,6 +101,21 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		setContentView(R.layout.item_view_layout);
 		TextView valueV = (TextView)findViewById(R.id.valueView);
 		valueV.setText("価格を\n絞り込む");
+		
+		/* http通信のテスト */
+		Button sendBt = (Button)findViewById(R.id.netSendButton);
+		sendBt.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+				EditText url = (EditText)findViewById(R.id.ipAddress);
+				HttpConnection httpConect = new HttpConnection();
+				String response = httpConect.doGet("http://" + url.getText().toString());
+				System.out.println("Response : " + response);
+			}
+			
+		});
+		/* http通信のテスト終了 */
 		
 		//商品を検索するボタンにクリックリスナー登録する
 		genreButton = (ImageButton)findViewById(R.id.genruButton);
@@ -281,15 +296,19 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			//listViewのどれが選択されたかを取得(genreIdに入っている)
 			//選択された項目のジャンルがあるデータをデータベースから持ってくる
 			//データをlayout.imageListに表示
-			if (!(min.equals("") && max.equals(""))) {
-				select = "itemValue >= ? and itemValue <= ? and genre = ?";
-				selectArgs = new String[]{ min, max, genre[genreId] };
+			Log.d("min == max", min + ":" + max);
+			if (("").equals(min) && ("").equals(max)) { 
+				select = "genre = ?";
+				selectArgs = new String[]{ genre[genreId] };
 			} else if (min.equals("")){
 				select = "itemValue <= ? and genre = ?";
 				selectArgs = new String[]{ max,genre[genreId], };
 			} else if (max.equals("")) {
 				select = "itemValue >= ? and genre = ?";
 				selectArgs = new String[]{ min,genre[genreId], };
+			} else {
+				select = "itemValue >= ? and itemValue <= ? and genre = ?";
+				selectArgs = new String[]{ min, max, genre[genreId], };
 			}
 			Log.d("Dailog in Button", String.valueOf(genreId));
 			if (genreId == 0) {
