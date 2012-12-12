@@ -2,5 +2,6 @@
     <item android:id="@+id/ownerData" android:icon="@drawable/tab_client" android:title="@string/owner_setting"></item>
     <item android:id="@+id/itemList" android:icon="@drawable/tab_item" android:title="@string/data_list"></item>
     <item android:id="@+id/ownerHistory" android:icon="@drawable/tab_mail" android:title="@string/owner_history"></item>
+    <item android:id="@+id/setting" android:title="設定"></item>
     
 </menu>

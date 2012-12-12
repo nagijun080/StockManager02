@@ -258,32 +258,6 @@
                </TableLayout>
            </LinearLayout>
 
-           <Button
-               android:id="@+id/netSendButton"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_gravity="bottom"
-               android:text="接続" />
-
-           <TextView
-               android:id="@+id/address"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_gravity="bottom"
-               android:layout_marginBottom="90dp"
-               android:text="接続先アドレス" />
-
-           <EditText
-               android:id="@+id/ipAddress"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:layout_gravity="bottom"
-               android:layout_marginBottom="50dp"
-               android:ems="10" >
-
-               <requestFocus />
-           </EditText>
-
     </FrameLayout>
 
 </LinearLayout>

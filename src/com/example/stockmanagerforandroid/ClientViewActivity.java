@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteConstraintException;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -17,6 +20,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -45,11 +49,22 @@ public class ClientViewActivity extends Activity {
 	public AlertDialog.Builder dialog;
 	public ListView listView;
 	public ArrayAdapter<String> adapter;
+	
+	//お客様データベース引数
+	public UserDBHelper userDBHel;
+	public String ownerId;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.clientview_layout);
+		
+		//発注者番号をownerIdに入れる
+		EditText ownerIdVw = (EditText)findViewById(R.id.ownerId);
+		ownerId = ownerIdVw.getText().toString();
+		
+		//お客様データをデータベースに保存
+		saveUserDB();
 		
 		Log.d("ClientViewActivity()", "01");
 		adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, USERDATA[0]);
@@ -141,6 +156,10 @@ public class ClientViewActivity extends Activity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		//"設定"用ダイアログ変数
+		final EditText url = new EditText(this);
+		AlertDialog.Builder alDia_Buil = new AlertDialog.Builder(this);
+		
 	    switch (item.getItemId()) {
 	    case R.id.ownerData:
 	    	Intent clientIntent = new Intent();
@@ -157,8 +176,47 @@ public class ClientViewActivity extends Activity {
 	    	historyViewIntent.setClass(this, HistoryViewActivity.class);
 	    	startActivity(historyViewIntent);
 	    	return true;
+	    case R.id.setting:
+	    	alDia_Buil.setTitle("接続先アドレスを入力");
+	    	alDia_Buil.setView(url);
+	    	alDia_Buil.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				// 設定の中にあるボタンをクリックでネットワークに接続
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO 自動生成されたメソッド・スタブ
+					/* http通信のテスト */
+					new Thread( new Runnable() {
+						public void run() {
+							HttpConnection httpConect = new HttpConnection();
+							String response = httpConect.doGet("http://" + url.getText().toString());
+							System.out.println("Response : " + response);
+						}
+					}).start();
+					/* http通信のテスト終了 */
+				}
+			}).show();
+	    	return true;
 	    }
 	    return false;
+	}
+	//onCreateでお客様データをとりあえずデータベースに入れる
+	public void saveUserDB() {
+		userDBHel = new UserDBHelper(this);
+		SQLiteDatabase db = userDBHel.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		for (int i = 0;i < USERDATA[0].length;i++) {
+			values.put("ownerId", ownerId);
+			values.put("company", USERDATA[0][i]);
+			values.put("name", USERDATA[1][i]);
+			values.put("telNumber", USERDATA[2][i]);
+			values.put("date", USERDATA[3][i]);
+			values.put("postNumber", USERDATA[4][i]);
+			values.put("address", USERDATA[5][i]);
+		}
+		try {
+			db.insertOrThrow("userDBTable", null, values);
+		} catch (SQLiteConstraintException e) {
+			db.update("userDBTable", values, "ownerId = ?", new String[] { ownerId, });
+		}
 	}
 	
 
