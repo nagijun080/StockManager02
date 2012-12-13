@@ -21,7 +21,8 @@ public class ItemDBHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		// TODO 自動生成されたメソッド・スタブ
 		String sql = "CREATE TABLE itemDB ( _ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-											+ " itemId INTEGER UNIQUE, itemName TEXT, itemValue INTEGER, itemData TEXT, genre TEXT);";
+											+ " id TEXT UNIQUE, itemId INTEGER UNIQUE," +
+											" itemName TEXT, itemValue INTEGER, itemData TEXT, genre TEXT);";
 		db.execSQL(sql);
 	}
 

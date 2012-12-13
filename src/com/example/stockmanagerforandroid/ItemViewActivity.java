@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,6 +43,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public Integer[] itemId = { R.drawable.imac_215, R.drawable.imac_27,
 								R.drawable.ipad_mini_bk, R.drawable.ipad_mini_whi,
 								R.drawable.macbook_13, R.drawable.macbook_13_retina };
+	public String[] id = { "00001", "00002", "00003", "00004", "00005", "00006", };
 	//macの商品名配列(itemIdと対応させる)
 	public String[]  itemName = { "21.5インチiMac", "27インチiMac", 
 			"iPadmini ブラック＆ストレート","iPadmini ホワイト＆シルバー", 
@@ -183,6 +185,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		for (int i = 0;i < itemId.length;i++) {				
 			Log.d("saveItemDB()","0" + i);
 			ContentValues values = new ContentValues();
+			values.put("id", id[i]);
 			values.put("itemId", itemId[i]);
 			values.put("itemName", itemName[i]);
 			values.put("itemValue", itemValue[i]);
@@ -488,6 +491,20 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		valText.setText("条件 : \n" + min + " ～ " + max);
 	}
 	
+	//商品のリストクリックした時の処理
+	public void itemListClick() {
+		ListView itemList = (ListView)findViewById(R.id.imageList);
+		itemList.setOnItemClickListener(new OnItemClickListener() {
+
+			public void onItemClick(AdapterView<?> adapter, View view, int position,
+					long id) {
+				// TODO 自動生成されたメソッド・スタブ
+				
+			}
+			
+		});
+		
+	}
 	
 }
  

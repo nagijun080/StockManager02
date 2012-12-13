@@ -78,5 +78,5 @@ public class HistoryViewActivity extends Activity {
 	    return false;
 	}
 	
-	
+	//
 }

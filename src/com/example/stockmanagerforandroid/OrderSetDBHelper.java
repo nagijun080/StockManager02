@@ -5,13 +5,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class UserDBHelper extends SQLiteOpenHelper {
+public class OrderSetDBHelper extends SQLiteOpenHelper {
 	
-	private static final String DB_NAME	= "userDataBase.db";
+	private static final String DB_NAME = "orderSetDatabase.db";
 	private static final int DB_VERSION = 1;
-	private static UserDBHelper userDBHelper;
+	private static OrderSetDBHelper orderSetDBHelper;
 
-	public UserDBHelper(Context context) {
+	public OrderSetDBHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
 		// TODO 自動生成されたコンストラクター・スタブ
 	}
@@ -19,10 +19,10 @@ public class UserDBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		// TODO 自動生成されたメソッド・スタブ
-		String sql = "CREATE TABLE userDBTable ( _ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-					 + "userId TEXT UNIQUE, company TEXT, name TEXT, telNumber TEXT, date TEXT, "
-					 + "postNumber TEXT, address TEXT);";
+		String sql = "CREATE TABLE orderSetDBTable ( _ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+					+ " ownerId INTEGER, userId INTEGER, itemId INTEGER, sumValue INTEGER);";
 		db.execSQL(sql);
+		
 	}
 
 	@Override
