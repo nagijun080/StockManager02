@@ -120,7 +120,7 @@ public class ClientViewActivity extends Activity {
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			//リスト項目がクリックされた時の処理
 			public void onItemClick(AdapterView<?> adapter, View view, int position,
-					long id) {
+					long itemId) {
 				// TODO 自動生成されたメソッド・スタブ
 				
 				Toast.makeText(ClientViewActivity.this, "dialog", Toast.LENGTH_LONG).show();

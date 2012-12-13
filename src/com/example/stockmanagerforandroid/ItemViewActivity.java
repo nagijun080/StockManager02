@@ -40,10 +40,10 @@ import android.widget.Toast;
 public class ItemViewActivity extends Activity implements OnClickListener, DialogInterface.OnClickListener{
 
 	//macの商品画像ID配列
-	public Integer[] itemId = { R.drawable.imac_215, R.drawable.imac_27,
+	public Integer[] itemImageId = { R.drawable.imac_215, R.drawable.imac_27,
 								R.drawable.ipad_mini_bk, R.drawable.ipad_mini_whi,
 								R.drawable.macbook_13, R.drawable.macbook_13_retina };
-	public String[] id = { "00001", "00002", "00003", "00004", "00005", "00006", };
+	public String[] itemId = { "00001", "00002", "00003", "00004", "00005", "00006", };
 	//macの商品名配列(itemIdと対応させる)
 	public String[]  itemName = { "21.5インチiMac", "27インチiMac", 
 			"iPadmini ブラック＆ストレート","iPadmini ホワイト＆シルバー", 
@@ -182,11 +182,11 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public void saveItemDB() {
 		Log.d("saveItemDB()","first");
 		
-		for (int i = 0;i < itemId.length;i++) {				
+		for (int i = 0;i < itemImageId.length;i++) {				
 			Log.d("saveItemDB()","0" + i);
 			ContentValues values = new ContentValues();
-			values.put("id", id[i]);
 			values.put("itemId", itemId[i]);
+			values.put("itemImageId", itemImageId[i]);
 			values.put("itemName", itemName[i]);
 			values.put("itemValue", itemValue[i]);
 			values.put("itemData", itemData[i]);
@@ -207,19 +207,19 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			
 			itemDBH = new ItemDBHelper(this);
 			SQLiteDatabase db = itemDBH.getWritableDatabase();
-			Log.d("itemId[i]", itemId[i].toString());
+			Log.d("itemImageId[i]", itemImageId[i].toString());
 			Integer checkRec = 0;
 			try  {
 				checkRec = Long.valueOf(db.insertOrThrow("itemDB", null, values)).intValue();
 				Log.d("db.insert","checkIns : " + String.valueOf(checkRec));
 			} catch (SQLiteConstraintException e) {
-				checkRec = db.update("itemDB", values, "itemId = ?", new String[] { itemId[i].toString(), });
+				checkRec = db.update("itemDB", values, "itemImageId = ?", new String[] { itemImageId[i].toString(), });
 				Log.d("db.update","checkRec : " + String.valueOf(checkRec));
 			}
 			itemDBH.close();
 //			Integer checkRec = null;
-//			if (cur.getString(0).equals(itemId[i])) {
-//				checkRec = (Integer)db.update("itemDB", values, "itemId = ?", new String[] { itemId[i].toString(), });
+//			if (cur.getString(0).equals(itemImageId[i])) {
+//				checkRec = (Integer)db.update("itemDB", values, "itemImageId = ?", new String[] { itemImageId[i].toString(), });
 //				Log.d("db.update","checkRec : " + String.valueOf(checkRec));
 //			} else {
 //				checkRec = Long.valueOf(db.insert("itemDB", null, values)).intValue();				
@@ -236,7 +236,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public void showItemDB(String select, String[] selectArgs, String orderBy){
 		SQLiteDatabase db = itemDBH.getWritableDatabase();
 		ListView imageList = (ListView)findViewById(R.id.imageList);
-		String[] colmns = { "itemId", "itemName", "itemValue", "itemData", "genre"};
+		String[] colmns = { "itemImageId", "itemName", "itemValue", "itemData", "genre"};
 		Cursor c = db.query("itemDB", colmns, select, selectArgs, null, null, orderBy);
 		//商品の情報が全部入った２次元配列
 		String[][] item = new String[c.getCount()][colmns.length];
@@ -499,11 +499,20 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			public void onItemClick(AdapterView<?> adapter, View view, int position,
 					long id) {
 				// TODO 自動生成されたメソッド・スタブ
-				
+				showListDialog();
 			}
 			
 		});
 		
+	}
+	//商品のリストをクリックした時ダイアログを表示させる
+	public void showListDialog() {
+		LayoutInflater inflater = LayoutInflater.from(this);
+		View view = inflater.inflate(R.layout.item_buy_layout, (ViewGroup)findViewById(R.id.itemBuyLayout));
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+		alertDialog.setView(view);
+		alertDialog.create();
+		alertDialog.show();
 	}
 	
 }
