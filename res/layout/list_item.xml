@@ -21,6 +21,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_weight="1"
+                android:scaleType="fitCenter"
                 android:src="@drawable/btnkey" />
 
         </LinearLayout>
@@ -30,28 +31,39 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical" >
+            
+            <TextView
+                android:id="@+id/itemId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:lines="1"
+                android:maxLines="1"
+                android:text="itemId" />
 
             <TextView
                 android:id="@+id/itemName"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
                 android:lines="3"
                 android:text="itemName" />
 
             <TextView
                 android:id="@+id/itemData"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
                 android:lines="3"
                 android:text="itemData" />
 
             <TextView
                 android:id="@+id/itemValue"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
                 android:lines="3"
                 android:text="itemValue" />
 

@@ -31,6 +31,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -97,6 +98,9 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public View itemRowVw;
 	
 	public EditText url;
+	//item_buy_layoutを使うための引数
+	//inflateして使う
+	public View buyView;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
@@ -113,6 +117,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		valueButton.setOnClickListener(this);
 		rowButton = (ImageButton)findViewById(R.id.rowButton);
 		rowButton.setOnClickListener(this);
+		
+		itemListClick();
 		//itemDBにデータを入れる
 		saveItemDB();
 		
@@ -236,7 +242,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public void showItemDB(String select, String[] selectArgs, String orderBy){
 		SQLiteDatabase db = itemDBH.getWritableDatabase();
 		ListView imageList = (ListView)findViewById(R.id.imageList);
-		String[] colmns = { "itemImageId", "itemName", "itemValue", "itemData", "genre"};
+		String[] colmns = { "itemId", "itemImageId", "itemName", "itemValue", "itemData", "genre"};
 		Cursor c = db.query("itemDB", colmns, select, selectArgs, null, null, orderBy);
 		//商品の情報が全部入った２次元配列
 		String[][] item = new String[c.getCount()][colmns.length];
@@ -256,15 +262,18 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				for (int j = 0;j < colmns.length;j++) {
 					switch (j) {
 					case 0:
-						customItem.setItemId(Integer.valueOf(item[i][j]));
+						customItem.setItemId(item[i][j]);
 						break;
 					case 1:
-						customItem.setItemName(item[i][j]);
+						customItem.setItemImageId(Integer.valueOf(item[i][j]));
 						break;
 					case 2:
-						customItem.setItemValue(Integer.valueOf(item[i][j]));
+						customItem.setItemName(item[i][j]);
 						break;
 					case 3:
+						customItem.setItemValue(Integer.valueOf(item[i][j]));
+						break;
+					case 4:
 						customItem.setItemData(item[i][j]);
 						break;
 					default:
@@ -495,24 +504,113 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public void itemListClick() {
 		ListView itemList = (ListView)findViewById(R.id.imageList);
 		itemList.setOnItemClickListener(new OnItemClickListener() {
-
+			//このViewはListViewのView
 			public void onItemClick(AdapterView<?> adapter, View view, int position,
 					long id) {
 				// TODO 自動生成されたメソッド・スタブ
 				showListDialog();
+				setListDiaView(view);
 			}
 			
 		});
 		
 	}
 	//商品のリストをクリックした時ダイアログを表示させる
+	//buyViewにinflateしてレイアウトが使えるようにしている
+	//onCreateで入れてもいいかな？
 	public void showListDialog() {
 		LayoutInflater inflater = LayoutInflater.from(this);
-		View view = inflater.inflate(R.layout.item_buy_layout, (ViewGroup)findViewById(R.id.itemBuyLayout));
+		//ダイアログのView
+		buyView = inflater.inflate(R.layout.item_buy_layout, (ViewGroup)findViewById(R.id.itemBuyLayout));
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-		alertDialog.setView(view);
+		alertDialog.setView(buyView);
+		//クリックしたら買えるようにする
+		alertDialog.setPositiveButton("OK", null);
 		alertDialog.create();
 		alertDialog.show();
+	}
+	
+	//商品ダイアログを出した時にデータベースから
+	//商品の情報をとってダイアログに表示
+	//引数:ListViewのView
+	//viewに表示させる
+	public void setListDiaView(View view) {
+		TextView itemNameView = (TextView)view.findViewById(R.id.itemName);
+		String itemName = itemNameView.getText().toString();
+		itemDBH = new ItemDBHelper(this);
+		SQLiteDatabase dbItem = itemDBH.getReadableDatabase();
+		String sql = "SELECT itemId, itemImageId, itemValue, itemName, itemData"
+					+ " from itemDB where itemName = ?;";
+		Cursor cur = dbItem.rawQuery(sql, new String[] { itemName, });
+		cur.moveToFirst();
+		Log.d("setListDiaView(view)","itemId:" + cur.getString(0));
+		setBuyLayout(cur);
+//		LayoutInflater inflater = LayoutInflater.from(this);
+//		//ダイアログのView
+//		buyView = inflater.inflate(R.layout.item_buy_layout, (ViewGroup)findViewById(R.id.itemBuyLayout), true);
+//		TextView itemIdView = (TextView)buyView.findViewById(R.id.itemNumber);
+//		itemIdView.setText("品番:" + cur.getString(0));
+//		ImageView itemImageVw = (ImageView)buyView.findViewById(R.id.itemImage);
+//		itemImageVw.setImageResource(cur.getInt(1));
+				
+	}
+	
+	//引数：データベースのカーソル
+	//カーソルのgetでデータを取得する
+	//そのデータをlayoutに反映させる
+	//itemId, itemImageId, itemValue, itemName, itemDataの順番
+	//itemValueだけ小計に使うので別変数に入れる
+	Integer value;
+	public void setBuyLayout(Cursor c) {
+		TextView itemIdView = (TextView)buyView.findViewById(R.id.itemNumber);
+		itemIdView.setText("品番:" + c.getString(0));
+		ImageView itemImageVw = (ImageView)buyView.findViewById(R.id.itemImage);
+		itemImageVw.setImageResource(c.getInt(1));
+		//itemValueだけ小計に使うので別変数に入れる
+		TextView valueView = (TextView)buyView.findViewById(R.id.value);
+		value = c.getInt(2);
+		valueView.setText("単価：" + String.valueOf(value));
+		
+		TextView nameView = (TextView)buyView.findViewById(R.id.itemName);
+		nameView.setText(c.getString(3));
+		TextView dataView = (TextView)buyView.findViewById(R.id.itemData);
+		dataView.setText(c.getString(4));
+		item_Num_ValueChange(c);
+	}
+	//個数を入れる引数
+	//showListDialog()内のPositiveButtonでitem_numを発注データベースに保存する
+	int item_count;
+	//価格の小計
+	Integer item_mSumValue;
+	//item_buy_layoutの個数変更ボタンの処理
+	public void item_Num_ValueChange(final Cursor c) {
+		final TextView item_numView = (TextView)buyView.findViewById(R.id.itemCount);
+		final TextView item_mTotalView = (TextView)buyView.findViewById(R.id.minTotal);
+		Button downButton = (Button)buyView.findViewById(R.id.downButton);
+		downButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+				if (!(item_count <= 1)) {
+					item_count--;
+				}
+				item_numView.setText("個数：" + String.valueOf(item_count));
+				item_mSumValue = c.getInt(2) * item_count;
+				item_mTotalView.setText("小計：" + item_mSumValue);
+				
+			}
+		});
+		
+		Button upButton = (Button)buyView.findViewById(R.id.upButton);
+		upButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+				item_count++;
+				item_numView.setText("個数：" + String.valueOf(item_count)); 
+				item_mSumValue = c.getInt(2) * item_count;
+				item_mTotalView.setText("小計：" + item_mSumValue);
+			}
+		});
+		
 	}
 	
 }

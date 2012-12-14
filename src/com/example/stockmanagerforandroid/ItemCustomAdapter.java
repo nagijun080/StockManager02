@@ -35,11 +35,13 @@ public class ItemCustomAdapter extends ArrayAdapter<CustomData> {
 		
 		//CustomDataのデータをViewの各viewにセットする
 		ImageView imageView = (ImageView)convertView.findViewById(R.id.imageView);
+		TextView idText = (TextView)convertView.findViewById(R.id.itemId);
 		TextView nameText = (TextView)convertView.findViewById(R.id.itemName);
 		TextView valueText = (TextView)convertView.findViewById(R.id.itemValue);
 		TextView dataText = (TextView)convertView.findViewById(R.id.itemData);
 		
-		imageView.setImageResource(item.getItemId());
+		idText.setText(item.getItemId());
+		imageView.setImageResource(item.getItemImageId());
 		nameText.setText(item.getItemName());
 		valueText.setText(item.getItemValue().toString());
 		dataText.setText(item.getItemData());

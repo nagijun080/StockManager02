@@ -1,17 +1,26 @@
 package com.example.stockmanagerforandroid;
 
 public class CustomData {
-	private Integer itemId_;
+	private String itemId_;
+	private Integer itemImageId_;
     private String itemName_;
     private Integer itemValue_;
     private String itemData_;
  
-    public void setItemId(Integer id) {
+    public void setItemId(String id) {
         itemId_ = id;
     }
  
-    public Integer getItemId() {
+    public String getItemId() {
         return itemId_;
+    }
+    
+    public void setItemImageId(Integer imageId) {
+    	itemImageId_ = imageId;
+    }
+    
+    public Integer getItemImageId() {
+    	return itemImageId_;
     }
  
     public void setItemName(String itemName) {
