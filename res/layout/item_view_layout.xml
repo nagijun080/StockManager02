@@ -258,6 +258,35 @@
                </TableLayout>
            </LinearLayout>
 
+           <FrameLayout
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_gravity="bottom" >
+
+               <Button
+                   android:id="@+id/btnCart"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="bottom"
+                   android:layout_marginBottom="20dp"
+                   android:layout_marginLeft="20dp"
+                   android:background="@drawable/btn_cart"
+                   android:gravity="bottom" />
+
+               <TextView
+                   android:id="@+id/itemNum_view"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="right|top"
+                   android:layout_marginRight="25dp"
+                   android:layout_marginTop="35dp"
+                   android:text="0"
+                   android:textColor="#ffffff"
+                   android:textSize="20sp"
+                   android:textStyle="bold" />
+
+           </FrameLayout>
+
     </FrameLayout>
 
 </LinearLayout>

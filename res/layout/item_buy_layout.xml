@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/itemBuyLayout"
@@ -76,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:text="Corei7" />
         </TableRow>
-		
+
         <TableRow
             android:id="@+id/tableRow4"
             android:layout_width="match_parent"
@@ -89,9 +89,8 @@
                 android:layout_height="5dp"
                 android:layout_weight="1"
                 android:background="#c8c8c8" />
-
         </TableRow>
-        
+
         <TableRow
             android:id="@+id/TableRow01"
             android:layout_width="match_parent"
@@ -101,12 +100,11 @@
             <TextView
                 android:id="@+id/valueText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="2"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:gravity="center"
                 android:text="個数変更" />
-            
+
             <Button
                 android:id="@+id/downButton"
                 style="?android:attr/buttonStyleSmall"
@@ -118,8 +116,9 @@
 
             <Space
                 android:layout_width="5dp"
-                android:layout_height="wrap_content" />
-            
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
             <Button
                 android:id="@+id/upButton"
                 style="?android:attr/buttonStyleSmall"
@@ -128,16 +127,15 @@
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@drawable/btn_item_up" />
-            
-             <TextView
-                 android:id="@+id/itemCount"
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content"
-                 android:layout_gravity="right|center"
-                 android:layout_marginLeft="10dp"
-                 android:layout_weight="4"
-                 android:text="個数：" />
-            
+
+            <TextView
+                android:id="@+id/itemCount"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="個数：" />
         </TableRow>
 
         <TableRow
@@ -159,4 +157,4 @@
         
     </TableLayout>
 
-</FrameLayout>
+</LinearLayout>

@@ -2,8 +2,6 @@ package com.example.stockmanagerforandroid;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,9 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,9 +17,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListAdapter;
-import android.widget.ListView;
+import android.widget.EditText;import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +29,6 @@ public class ClientViewActivity extends Activity {
 								R.id.postName, R.id.addressName };
 	
 	//お客様情報
-	private int NUM = 2;
 	public String[][] USERDATA = { { "00001", "00002" },
 								{"福博綜合印刷", "ユーコー"},
 								{"福博　太郎", "福博　優子"},
@@ -45,8 +38,6 @@ public class ClientViewActivity extends Activity {
 								{"福岡市博多区堅粕３丁目１６番１４号", "福岡市博多区堅粕３丁目１６番１６号"}};
 
 	
-	//お客様を識別するID
-	public int userId = 0;
 	
 	public AlertDialog.Builder dialog;
 	public ListView listView;
@@ -58,6 +49,8 @@ public class ClientViewActivity extends Activity {
 	public OrderSetDBHelper orderSetDBHel;
 	/*発注者番号*/
 	public String ownerId = "";
+	//お客様を識別するID
+	public Integer userId;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -144,9 +137,12 @@ public class ClientViewActivity extends Activity {
 		if ((ownerId.equals("") || ownerId.length() != 4) && R.id.setting != item.getItemId()) {
 			Log.d("設定ボタン", "発注者番号が4文字ちゃんと入っていない");
 			return false;
-		} else {
+		} else if (userId == null && R.id.setting != item.getItemId()) {
+			Toast.makeText(this, "お客様情報が入っていません。", Toast.LENGTH_SHORT);
+			return false;
+		} /*else {
 			setOrderSetDB();
-		}
+		}*/
 		
 		//"設定"用ダイアログ変数
 		final EditText url = new EditText(this);
@@ -156,16 +152,22 @@ public class ClientViewActivity extends Activity {
 	    case R.id.ownerData:
 	    	Intent clientIntent = new Intent();
     		clientIntent.setClass(this, ClientViewActivity.class);
+    		clientIntent.putExtra("ownerId_", ownerId);
+    		clientIntent.putExtra("userId_", USERDATA[0][userId]);
     		startActivity(clientIntent);
 	        return true;
 	    case R.id.itemList:
 	    	Intent itemViewIntent = new Intent();
     		itemViewIntent.setClass(this, ItemViewActivity.class);
+    		itemViewIntent.putExtra("ownerId_", ownerId);
+    		itemViewIntent.putExtra("userId_", USERDATA[0][userId]);
     		startActivity(itemViewIntent);
 	        return true;
 	    case R.id.ownerHistory:
 	    	Intent historyViewIntent = new Intent();
 	    	historyViewIntent.setClass(this, HistoryViewActivity.class);
+	    	historyViewIntent.putExtra("ownerId_", ownerId);
+	    	historyViewIntent.putExtra("userId_", USERDATA[0][userId]);
 	    	startActivity(historyViewIntent);
 	    	return true;
 	    case R.id.setting:
@@ -228,7 +230,7 @@ public class ClientViewActivity extends Activity {
 			if (!(NUM.equals(ownerIdVw.getText().toString().length()))) {
 				Toast.makeText(this, "発注者番号の文字数は4文字にしてください。", Toast.LENGTH_SHORT).show();
 			} else {
-				setOrderSetDB();
+				/*setOrderSetDB();*/
 				//発注者番号をownerIdに入れる
 				ownerId = ownerIdVw.getText().toString();
 			}
@@ -238,7 +240,7 @@ public class ClientViewActivity extends Activity {
 		}
 		Log.d("checkOwnerId()", "02 : " + ownerId);
 	}
-	//発注者番号とお客様番号を発注設定データベースに保存
+	/*//発注者番号とお客様番号を発注設定データベースに保存
 	//これが実行される時、ownerIdがちゃんと入ってない場合実行しない
 	public void setOrderSetDB() {
 		orderSetDBHel = new OrderSetDBHelper(this);
@@ -251,7 +253,7 @@ public class ClientViewActivity extends Activity {
 		Log.d("setOrderSetDB()", "01 : inserOk");
 		
 		orderSetDBHel.close();
-	}
+	}*/
 	//お客様情報をデータベースから持ってきて、表示させるメソッド
 	public void showClientView() {
 		userDBHel = new UserDBHelper(this);

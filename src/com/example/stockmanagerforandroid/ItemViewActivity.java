@@ -40,6 +40,7 @@ import android.widget.Toast;
 
 public class ItemViewActivity extends Activity implements OnClickListener, DialogInterface.OnClickListener{
 
+	private static final int ERROR = 9999;
 	//macの商品画像ID配列
 	public Integer[] itemImageId = { R.drawable.imac_215, R.drawable.imac_27,
 								R.drawable.ipad_mini_bk, R.drawable.ipad_mini_whi,
@@ -94,13 +95,15 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	private String min = "";
 	private String max = "";
 	public View itemValVw;
-	
 	public View itemRowVw;
 	
 	public EditText url;
 	//item_buy_layoutを使うための引数
 	//inflateして使う
 	public View buyView;
+	//intentでClientViewからownerIdとuserIdをもらってくる
+	public String ownerId;
+	public String userId;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
@@ -109,6 +112,11 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		setContentView(R.layout.item_view_layout);
 		TextView valueV = (TextView)findViewById(R.id.valueView);
 		valueV.setText("価格を\n絞り込む");
+		
+		//ClientViewActivityからownerIdとuserIdを持ってくる
+		Intent intent = getIntent();
+		ownerId = intent.getStringExtra("ownerId_");
+		userId = intent.getStringExtra("userId_");
 		
 		//商品を検索するボタンにクリックリスナー登録する
 		genreButton = (ImageButton)findViewById(R.id.genruButton);
@@ -525,7 +533,15 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setView(buyView);
 		//クリックしたら買えるようにする
-		alertDialog.setPositiveButton("OK", null);
+		alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO 自動生成されたメソッド・スタブ
+				setOrder_DB();
+				addNum_CartView();
+			}
+			
+		});
 		alertDialog.create();
 		alertDialog.show();
 	}
@@ -561,11 +577,14 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	//itemId, itemImageId, itemValue, itemName, itemDataの順番
 	//itemValueだけ小計に使うので別変数に入れる
 	Integer value;
+	//商品画像が入っているリソースID
+	Integer item_ImageId;
 	public void setBuyLayout(Cursor c) {
 		TextView itemIdView = (TextView)buyView.findViewById(R.id.itemNumber);
 		itemIdView.setText("品番:" + c.getString(0));
 		ImageView itemImageVw = (ImageView)buyView.findViewById(R.id.itemImage);
-		itemImageVw.setImageResource(c.getInt(1));
+		item_ImageId = c.getInt(1);
+		itemImageVw.setImageResource(item_ImageId);
 		//itemValueだけ小計に使うので別変数に入れる
 		TextView valueView = (TextView)buyView.findViewById(R.id.value);
 		value = c.getInt(2);
@@ -610,6 +629,42 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				item_mTotalView.setText("小計：" + item_mSumValue);
 			}
 		});
+	}
+	
+	//OrderSetDBHelperのorderSetDBTableにinsertOrUpdateする
+	//item_buy_layoutのPositiveButtonでデータベースにinsertする
+	public void setOrder_DB() {
+		OrderSetDBHelper orderSet_DBH = new OrderSetDBHelper(this);
+		SQLiteDatabase db_order = orderSet_DBH.getWritableDatabase();
+		ContentValues order_values = new ContentValues();
+		order_values.put("ownerId", ownerId);
+		order_values.put("userId", userId);
+		order_values.put("itemImageId", item_ImageId);
+		order_values.put("item_num", item_count);
+		order_values.put("sumValue", item_mSumValue);
+		db_order.insertOrThrow("orderSetDBTable", null, order_values);
+		db_order.close();
+		orderSet_DBH.close();
+	}
+	
+	//item_buy_layoutのPositiveBtnが押されたら
+	//item_view_layoutのitemNum_viewに個数を反映させる
+	public void addNum_CartView() {
+		OrderSetDBHelper orderSet_DBH = new OrderSetDBHelper(this);
+		SQLiteDatabase db_order = orderSet_DBH.getReadableDatabase();
+		String sql = "SELECT ownerId, itemImageId FROM orderSetDBTable WHERE ownerId = ? GROUP BY itemImageId;";
+		Cursor cur = db_order.rawQuery(sql, new String[] { ownerId, });
+		int count = 0;
+		cur.moveToFirst();
+		for (int i = 0;i < cur.getCount();i++) {
+			count++;
+			cur.moveToNext();
+		}
+		int itemType_num = count;
+		Log.d("addNum_CartView","商品の種類別個数" + String.valueOf(itemType_num));
+		orderSet_DBH.close();			
+		TextView itemNum_View = (TextView)findViewById(R.id.itemNum_view);
+		itemNum_View.setText(String.valueOf(itemType_num));
 		
 	}
 	
