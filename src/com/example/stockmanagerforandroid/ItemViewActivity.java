@@ -119,13 +119,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		
 		//カートダイアログ表示ボタン
 		cartDialog = new AlertDialog.Builder(this);
-		Button cartButton = (Button)findViewById(R.id.btnCart);
-		cartButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				// TODO 自動生成されたメソッド・スタブ
-			}
-		});
-		
+		cartClick();
 		//ClientViewActivityからownerIdとuserIdを持ってくる
 		Intent intent = getIntent();
 		ownerId = intent.getStringExtra("ownerId_");
@@ -160,11 +154,12 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		getMenuInflater().inflate(R.menu.menu_layout, menu);
 		return true;
 	}
-	
+	String urlSt;
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		//"設定"用ダイアログ変数
 		url = new EditText(this);
+		url.setText("172.16.80.35");
 		AlertDialog.Builder alDia_Buil = new AlertDialog.Builder(this);
 		
 	    switch (item.getItemId()) {
@@ -190,17 +185,9 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				// 設定の中にあるボタンをクリックでネットワークに接続
 				public void onClick(DialogInterface dialog, int which) {
 					// TODO 自動生成されたメソッド・スタブ
-					/* http通信のテスト */
-					new Thread( new Runnable() {
-						public void run() {
-							HttpConnection httpConect = new HttpConnection();
-							String response = httpConect.doGet("http://" + url.getText().toString());
-							System.out.println("Response : " + response);
-						}
-					}).start();
-					/* http通信のテスト終了 */
+					urlSt = url.getText().toString();
 				}
-			}).show();
+	    	}).show();
 	    	return true;
 	    }
 	    return false;
@@ -686,35 +673,121 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		LayoutInflater inflate = LayoutInflater.from(this);
 		cartView = inflate.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
 		ListView listInCart = (ListView)cartView.findViewById(R.id.itemListInCart);
+		
 		List<CustomDialogInCart> objects = new ArrayList<CustomDialogInCart>();
-		
-		CustomDialogInCart item1 = new CustomDialogInCart();
-		
+		for (int i = 0;i < orderCount;i++) {
+			CustomDialogInCart item = new CustomDialogInCart();
+			item.setImageId(imageId_In_OrderDB[i]);
+			item.setItemNum(itemNum_In_OrderDB[i].toString());
+			item.setItemMinTotal(minTotal_In_OrderDB[i].toString());
+			item.setItemData(itemData_In_ItemDB[i]);
+			item.setItemId(itemId_In_ItemDB[i]);
+			item.setItemName(itemName_In_ItemDB[i]);
+			item.setItemUnitPrice(unitPrice_In_ItemDB[i]);
+			objects.add(item);
+		}
 		CustomAdapterInCart adapter = new CustomAdapterInCart(this, 0, objects);
 		listInCart.setAdapter(adapter);
+		
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		dialogBuilder.setView(cartView);
+		//http通信
+		sendOrder();
+		dialogBuilder.create();
+		dialogBuilder.show();
 	}
-	//発注したい情報入れる変数
-	Integer[] imageIdInOrder_DB = new Integer[10];
-	String[] itemIdInOrder_DB = new String[10];
-	String[] itemNameInOrder_DB = new String[10];
-	String[] itemDataInOrder_DB = new String[10];
-	Integer[] itemNumInOrder_DB = new Integer[10];
-	String[] unitPriceInOrder_DB = new String[10];
-	Integer[] minTotalInOrder_DB = new Integer[10];
+	/*あとで配列に全部入れる。今はテスト */
+	//発注したい情報をOrderSetDBから入れる変数
+	Integer[] imageId_In_OrderDB = new Integer[10];
+	Integer[] itemNum_In_OrderDB = new Integer[10];
+	Integer[] minTotal_In_OrderDB = new Integer[10];
+	//imageId_In_OrderDBを元にItemDBHelperから情報と得る
+	String[] itemId_In_ItemDB = new String[10];
+	String[] itemName_In_ItemDB = new String[10];
+	String[] itemData_In_ItemDB = new String[10];
+	String[] unitPrice_In_ItemDB = new String[10];
+	//カートの中に入っている商品数-1
+	int orderCount = 0;
+	
 	//btnCartを押した時、データベースから発注情報を持ってくる
-	public void getOrderDB() {
+	public void setOrderDB_In_Cart() {
 		OrderSetDBHelper orderDB = new OrderSetDBHelper(this);
 		SQLiteDatabase db_order = orderDB.getReadableDatabase();
-		String sql = "SELECT ownerId, itemImageId, item_num, sumValue FROM orderSetDBTable WHERE ownerId = ?";
+		String sql = "SELECT ownerId, itemImageId, item_num, sumValue FROM orderSetDBTable WHERE ownerId = ?;";
 		Cursor cur = db_order.rawQuery(sql, new String[] { ownerId });
 		cur.moveToFirst();
-		imageIdInOrder_DB = cur.getInt(1);
-		itemNumInOrder_DB = cur.getInt(2);
-		minTotalInOrder_DB = cur.getInt(3);
+		for (int i = 0;i < cur.getCount();i++) {
+			imageId_In_OrderDB[i] = cur.getInt(1);
+			itemNum_In_OrderDB[i] = cur.getInt(2);
+			Log.d("setOrderDB()","01 : " + cur.getInt(2));
+			minTotal_In_OrderDB[i] = cur.getInt(3);
+			cur.moveToNext();
+			orderCount++;
+		}
+		orderDB.close(); 
 		
+		setItemDB_In_Cart();
 	}
 	
-	//imageIdInOrder_DBに入っているリソースIDを元にitemDBHelper内の
-	//商品情報をitemCustomAdapterにセットする　
+	//imageId_In_OrderDBに入っているリソースIDを元にitemDBHelper内の
+	//商品情報を配列にセットする
+	public void setItemDB_In_Cart()	 {
+		ItemDBHelper itemDBH = new ItemDBHelper(this);
+		SQLiteDatabase db_item = itemDBH.getReadableDatabase();
+		String sql = "SELECT itemId, itemImageId, itemName, itemValue, itemData FROM itemDB WHERE itemImageId = ?;";
+		for (int i = 0;i < orderCount;i++) {
+			Cursor c = db_item.rawQuery(sql, new String[]{ imageId_In_OrderDB[i].toString(), });
+			c.moveToFirst();
+			itemId_In_ItemDB[i] = c.getString(0);
+			itemName_In_ItemDB[i] = c.getString(2);
+			unitPrice_In_ItemDB[i] = c.getString(3);
+			itemData_In_ItemDB[i] = c.getString(4);
+		}
+		itemDBH.close();
+	}
+	
+	//cartBtnをにクリックリスナー
+	public void cartClick() {
+		Button cartButton = (Button)findViewById(R.id.btnCart);
+		cartButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+				setOrderDB_In_Cart();
+				setDiaInCart();
+				orderCount = 0;
+			}
+		});
+	}
+	
+	//cart内の発注送信
+	public void sendOrder() {
+		Button sendOrderBtn = (Button)cartView.findViewById(R.id.sendOrderBtn);
+		sendOrderBtn.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+				/* http通信Thread */
+				new Thread( new Runnable() {
+					public void run() {
+						HttpConnection httpConect = new HttpConnection();
+						String url_ = "http://" + urlSt + "/android/index.php/?";
+						String uri = "ownerId:=" + ownerId + "&" + "itemId:=" + itemId_In_ItemDB[0];
+						String response = httpConect.doGet(url_ + uri);
+						System.out.println("Response : " + response);
+					}
+				}).start();
+				/* http通信Thread終了 */
+			}			
+		});
+	}
+	
+	//設定のURLをorderSetDBTableに保存する
+	public void saveURL() {
+		OrderSetDBHelper orderSetDBH = new OrderSetDBHelper(this);
+		SQLiteDatabase db_orderDB = orderSetDBH.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put("url", urlSt);
+		db_orderDB.update("orderSetDBTable", values, "ownerId = ?", new String[]{ ownerId, });
+		orderSetDBH.close();
+	}
+	
 }
- 

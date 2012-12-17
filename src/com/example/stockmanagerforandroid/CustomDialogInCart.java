@@ -34,7 +34,7 @@ public class CustomDialogInCart {
 		return itemName;
 	}
 	
-	public void setitemData(String itemData_) {
+	public void setItemData(String itemData_) {
 		itemData = itemData_;
 	}
 	
