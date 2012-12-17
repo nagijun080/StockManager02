@@ -104,6 +104,10 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	//intentでClientViewからownerIdとuserIdをもらってくる
 	public String ownerId;
 	public String userId;
+	
+	//カートボタンを押した時のダイアログ
+	AlertDialog.Builder cartDialog;
+	View cartView;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
@@ -112,6 +116,15 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		setContentView(R.layout.item_view_layout);
 		TextView valueV = (TextView)findViewById(R.id.valueView);
 		valueV.setText("価格を\n絞り込む");
+		
+		//カートダイアログ表示ボタン
+		cartDialog = new AlertDialog.Builder(this);
+		Button cartButton = (Button)findViewById(R.id.btnCart);
+		cartButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+			}
+		});
 		
 		//ClientViewActivityからownerIdとuserIdを持ってくる
 		Intent intent = getIntent();
@@ -668,5 +681,40 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		
 	}
 	
+	//btnCartを押したあとの処理
+	public void setDiaInCart() {
+		LayoutInflater inflate = LayoutInflater.from(this);
+		cartView = inflate.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
+		ListView listInCart = (ListView)cartView.findViewById(R.id.itemListInCart);
+		List<CustomDialogInCart> objects = new ArrayList<CustomDialogInCart>();
+		
+		CustomDialogInCart item1 = new CustomDialogInCart();
+		
+		CustomAdapterInCart adapter = new CustomAdapterInCart(this, 0, objects);
+		listInCart.setAdapter(adapter);
+	}
+	//発注したい情報入れる変数
+	Integer[] imageIdInOrder_DB = new Integer[10];
+	String[] itemIdInOrder_DB = new String[10];
+	String[] itemNameInOrder_DB = new String[10];
+	String[] itemDataInOrder_DB = new String[10];
+	Integer[] itemNumInOrder_DB = new Integer[10];
+	String[] unitPriceInOrder_DB = new String[10];
+	Integer[] minTotalInOrder_DB = new Integer[10];
+	//btnCartを押した時、データベースから発注情報を持ってくる
+	public void getOrderDB() {
+		OrderSetDBHelper orderDB = new OrderSetDBHelper(this);
+		SQLiteDatabase db_order = orderDB.getReadableDatabase();
+		String sql = "SELECT ownerId, itemImageId, item_num, sumValue FROM orderSetDBTable WHERE ownerId = ?";
+		Cursor cur = db_order.rawQuery(sql, new String[] { ownerId });
+		cur.moveToFirst();
+		imageIdInOrder_DB = cur.getInt(1);
+		itemNumInOrder_DB = cur.getInt(2);
+		minTotalInOrder_DB = cur.getInt(3);
+		
+	}
+	
+	//imageIdInOrder_DBに入っているリソースIDを元にitemDBHelper内の
+	//商品情報をitemCustomAdapterにセットする　
 }
  
