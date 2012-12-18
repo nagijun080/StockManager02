@@ -1,6 +1,10 @@
 package com.example.stockmanagerforandroid;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -159,7 +163,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public boolean onOptionsItemSelected(MenuItem item) {
 		//"設定"用ダイアログ変数
 		url = new EditText(this);
-		url.setText("172.16.80.35");
+		url.setText("172.16.80.35/android/index.php/?");
 		AlertDialog.Builder alDia_Buil = new AlertDialog.Builder(this);
 		
 	    switch (item.getItemId()) {
@@ -769,7 +773,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				new Thread( new Runnable() {
 					public void run() {
 						HttpConnection httpConect = new HttpConnection();
-						String url_ = "http://" + urlSt + "/android/index.php/?";
+						String url_ = "http://" + urlSt;
 						String uri = "ownerId:=" + ownerId + "&" + "itemId:=" + itemId_In_ItemDB[0];
 						String response = httpConect.doGet(url_ + uri);
 						System.out.println("Response : " + response);
@@ -790,4 +794,94 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		orderSetDBH.close();
 	}
 	
+	AlertDialog.Builder orderSet_Dialog;
+	
+	//カートダイアログ納品設定処理
+	public void orderItem_set() {
+		LayoutInflater inflater = LayoutInflater.from(this);
+		//納品設定ボタン
+		View cart_dialogView = inflater.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
+		final View orderSet_View = inflater.inflate(R.layout.order_set_dialog_layout, (ViewGroup)findViewById(R.id.orderSet_dialog_Ll));
+		Button deliBtn = (Button)cart_dialogView.findViewById(R.id.deliveryBtn);
+		//ownerIdを元に各Widgetにデータベースから持ってきてset
+		deliBtn.setOnClickListener(new OnClickListener() {	
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+				orderSet_Dialog = new AlertDialog.Builder(ItemViewActivity.this);
+				orderSet_Dialog.setPositiveButton("納品情報を設定", new DialogInterface.OnClickListener() {
+					//発注データベースに配達日も含め保存する
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO 自動生成されたメソッド・スタブ
+						setOrderView_from_userDB(orderSet_View);
+					}
+					
+				});
+				//orderSet_Viewに納品設定のlayoutをセット
+				orderSet_Dialog.setView(orderSet_View);
+				orderSet_Dialog.create();
+				orderSet_Dialog.show();
+			}
+			
+		});
+		//配達日変更ボタン
+		Button haitatsuChange_Btn = (Button)orderSet_View.findViewById(R.id.haitatsubi_change);
+		haitatsuChange_Btn.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+				
+			}
+			
+		});
+		
+		//お届け日をセットするボタン
+		AlertDialog.Builder orderDateChange_Dialog = new AlertDialog.Builder(this);
+		ListView dateListView = new ListView(this);
+		
+		setDateListView(dateListView);
+		final TextView orderDateView = (TextView)orderSet_View.findViewById(R.id.haitatsubi);
+		orderDateChange_Dialog.setPositiveButton("お届け日設定", new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO 自動生成されたメソッド・スタブ
+				orderDateView.setText(text);
+			}
+		});
+	}
+	
+	//納品設定ボタンが押された時、データベースから持ってきてViewにセットする
+	public void setOrderView_from_userDB(View view) {
+		TextView ownerIdView = (TextView)view.findViewById(R.id.ownerId_View);
+		ownerIdView.setText(ownerId);
+		
+		TextView[] orderSet_TxVw = new TextView[] { (TextView)findViewById(R.id.userID_view),
+													(TextView)findViewById(R.id.companyName),
+													(TextView)findViewById(R.id.tantoName_View),
+													(TextView)findViewById(R.id.telNumber_View),
+													(TextView)findViewById(R.id.endDate_View),
+													(TextView)findViewById(R.id.postNumber),
+													(TextView)findViewById(R.id.addressView),};
+		
+		UserDBHelper userDBH = new UserDBHelper(this);
+		SQLiteDatabase db_userDB = userDBH.getReadableDatabase();
+		String sql = "SELECT userId, company, name, telNumber, date, postNumber, address FROM userDBTable WHERE userId = ?;";
+		String[] selectionArgs = new String[] { userId, };
+		Cursor c = db_userDB.rawQuery(sql, selectionArgs);
+		c.moveToFirst();
+		for (int i = 0;i < orderSet_TxVw.length;i++) {
+			orderSet_TxVw[i].setText(c.getString(i));
+		}
+		
+	}
+	//日付処理
+	public void setDateListView(ListView listView) {
+		Calendar nowCalendar = Calendar.getInstance();
+		for (int i = 0;i < 31;i++) {
+			nowCalendar.add(Calendar.DATE, i);
+			DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+			TextView dateText = new TextView(this);
+			dateText.setText(df.format(nowCalendar.getTime()));
+			listView.addView(dateText);
+		}
+	}
 }
