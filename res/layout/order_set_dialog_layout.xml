@@ -7,18 +7,19 @@
 
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:layout_weight="1" >
 
         <TableRow
             android:id="@+id/tableRow1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1" >
 
             <TextView
                 android:id="@+id/textView1"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="発注ID" />
@@ -26,7 +27,7 @@
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="発注者番号" />
@@ -34,7 +35,7 @@
             <TextView
                 android:id="@+id/ownerId_View"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="0000" />
@@ -44,7 +45,7 @@
         <TableRow
             android:id="@+id/tableRow2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" 
+            android:layout_height="match_parent"
             android:layout_weight="1" >
 
             <TextView
@@ -59,20 +60,20 @@
         <TableRow
             android:id="@+id/tableRow3"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" 
+            android:layout_height="match_parent"
             android:layout_weight="1" >
 
             <TextView
                 android:id="@+id/userIdView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="お客様ID" />
 
             <TextView
                 android:id="@+id/userID_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="00000" />
 
@@ -81,19 +82,20 @@
         <TableRow
             android:id="@+id/tableRow4"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" 
+            android:layout_height="match_parent"
             android:layout_weight="1" >
 
             <TextView
                 android:id="@+id/nameView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:text="お名前：" />
 
             <TextView
                 android:id="@+id/company_name"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="福博綜合印刷" />
 
@@ -109,14 +111,14 @@
             <TextView
                 android:id="@+id/textView8"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="ご担当：" />
 
             <TextView
                 android:id="@+id/tantoName_View"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="福博たろう" />
 
@@ -131,14 +133,14 @@
             <TextView
                 android:id="@+id/telView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="ご連絡先：" />
 
             <TextView
                 android:id="@+id/telNumber_View"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="092-000-0000" />
 
@@ -154,12 +156,13 @@
                 android:id="@+id/endDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="期日：" />
 
             <TextView
                 android:id="@+id/endDate_View"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="毎月20日" />
 
@@ -172,36 +175,37 @@
             android:layout_weight="1" >
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical" >
 
                 <TextView
-                    android:id="@+id/addressView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:id="@+id/address"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:text="ご住所：" />
 
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical" >
 
                 <TextView
                     android:id="@+id/postNumber"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
                     android:text="000-0000" />
 
                 <TextView
                     android:id="@+id/addressView"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:lines="3"
                     android:text="福岡市博多区" />
@@ -228,25 +232,35 @@
         <TableRow
             android:id="@+id/tableRow10"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" 
+            android:layout_height="30dp"
             android:layout_weight="1" >
 
             <TextView
                 android:id="@+id/haitatsubi"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="20dp"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
                 android:text="配達希望日" />
 
+            <TextView
+                android:id="@+id/sendOrder_date"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="2010/12/25" />
+
             <Button
                 android:id="@+id/haitatsubi_change"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right|center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="配達日変更" />
+                android:text="配達日変更"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:typeface="normal" />
 
         </TableRow>
 
@@ -273,8 +287,8 @@
 
             <TextView
                 android:id="@+id/bikou"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="備考" />
 

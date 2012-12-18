@@ -116,6 +116,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
 		super.onCreate(savedInstanceState);	
+		urlSt = "172.16.80.35/android/index.php/?";
 		//LayoutのvalueViewだけ改行処理
 		setContentView(R.layout.item_view_layout);
 		TextView valueV = (TextView)findViewById(R.id.valueView);
@@ -161,9 +162,9 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	String urlSt;
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		//"設定"用ダイアログ変数
 		url = new EditText(this);
-		url.setText("172.16.80.35/android/index.php/?");
+		url.setText(urlSt);
+		//"設定"用ダイアログ変数
 		AlertDialog.Builder alDia_Buil = new AlertDialog.Builder(this);
 		
 	    switch (item.getItemId()) {
@@ -467,10 +468,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	}
 	
 	//価格設定ダイアログで最小値から最大値までをlistViewに表示させる
-	/*ソート
-	 * min=1000000,max=12
-	 * itemValue>=1000000 and itemValue<=12
-	 * 1000000<=itemValue<=12*/
+	
 	public void setValView() {
 		
 		EditText minEditVw = (EditText)itemValVw.findViewById(R.id.minText);
@@ -712,7 +710,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	String[] unitPrice_In_ItemDB = new String[10];
 	//カートの中に入っている商品数-1
 	int orderCount = 0;
-	
+	int roopCount;
 	//btnCartを押した時、データベースから発注情報を持ってくる
 	public void setOrderDB_In_Cart() {
 		OrderSetDBHelper orderDB = new OrderSetDBHelper(this);
@@ -720,7 +718,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		String sql = "SELECT ownerId, itemImageId, item_num, sumValue FROM orderSetDBTable WHERE ownerId = ?;";
 		Cursor cur = db_order.rawQuery(sql, new String[] { ownerId });
 		cur.moveToFirst();
-		for (int i = 0;i < cur.getCount();i++) {
+		roopCount = cur.getCount();
+		for (int i = 0;i < roopCount;i++) {
 			imageId_In_OrderDB[i] = cur.getInt(1);
 			itemNum_In_OrderDB[i] = cur.getInt(2);
 			Log.d("setOrderDB()","01 : " + cur.getInt(2));
@@ -750,19 +749,21 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		itemDBH.close();
 	}
 	
-	//cartBtnをにクリックリスナー
+	//cartBtnをにクリックリスナ-登録
 	public void cartClick() {
 		Button cartButton = (Button)findViewById(R.id.btnCart);
 		cartButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				// TODO 自動生成されたメソッド・スタブ
+				// TODO 自動生成されたメソッド・スタブ				
 				setOrderDB_In_Cart();
 				setDiaInCart();
+				//カート中の納品設定処理
+				orderItem_set();
 				orderCount = 0;
 			}
 		});
 	}
-	
+	Boolean httpBool = false;
 	//cart内の発注送信
 	public void sendOrder() {
 		Button sendOrderBtn = (Button)cartView.findViewById(R.id.sendOrderBtn);
@@ -772,11 +773,21 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				/* http通信Thread */
 				new Thread( new Runnable() {
 					public void run() {
-						HttpConnection httpConect = new HttpConnection();
-						String url_ = "http://" + urlSt;
-						String uri = "ownerId:=" + ownerId + "&" + "itemId:=" + itemId_In_ItemDB[0];
-						String response = httpConect.doGet(url_ + uri);
-						System.out.println("Response : " + response);
+						for (int i = 0;i < roopCount;i++) {
+							HttpConnection httpConect = new HttpConnection();
+							String url_ = "http://" + urlSt;
+							String uri = "ownerId:=" + ownerId + "&" + "itemId:=" + itemId_In_ItemDB[i] + "&"
+										+ "unitPrice:=" + unitPrice_In_ItemDB[i] + "&" + "itemNum:=" + itemNum_In_OrderDB[i] 
+										+ "&" + "itemMinTotal:=" + minTotal_In_OrderDB[i];
+							String response = httpConect.doGet(url_ + uri);
+							//通信ができたらtrue,できなかったらfalse
+							if (response != null) {
+								httpBool = true;
+							} else {
+								httpBool = false;
+							}
+							System.out.println("Response : " + response + "httpBool:" + httpBool);
+						}
 					}
 				}).start();
 				/* http通信Thread終了 */
@@ -798,24 +809,26 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	
 	//カートダイアログ納品設定処理
 	public void orderItem_set() {
+		Log.d("orderItem_set()", "01");
 		LayoutInflater inflater = LayoutInflater.from(this);
 		//納品設定ボタン
-		View cart_dialogView = inflater.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
+		//View cart_dialogView = inflater.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
 		final View orderSet_View = inflater.inflate(R.layout.order_set_dialog_layout, (ViewGroup)findViewById(R.id.orderSet_dialog_Ll));
-		Button deliBtn = (Button)cart_dialogView.findViewById(R.id.deliveryBtn);
+		Button deliBtn = (Button)cartView.findViewById(R.id.deliveryBtn);
 		//ownerIdを元に各Widgetにデータベースから持ってきてset
 		deliBtn.setOnClickListener(new OnClickListener() {	
 			public void onClick(View v) {
+				Log.d("orderItem_set()", "02");
 				// TODO 自動生成されたメソッド・スタブ
 				orderSet_Dialog = new AlertDialog.Builder(ItemViewActivity.this);
 				orderSet_Dialog.setPositiveButton("納品情報を設定", new DialogInterface.OnClickListener() {
 					//発注データベースに配達日も含め保存する
 					public void onClick(DialogInterface dialog, int which) {
 						// TODO 自動生成されたメソッド・スタブ
-						setOrderView_from_userDB(orderSet_View);
 					}
 					
 				});
+				setOrderView_from_userDB(orderSet_View);
 				//orderSet_Viewに納品設定のlayoutをセット
 				orderSet_Dialog.setView(orderSet_View);
 				orderSet_Dialog.create();
@@ -823,44 +836,63 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			}
 			
 		});
+		
+		final AlertDialog.Builder orderDateChange_Dialog = new AlertDialog.Builder(this);
+		ListView dateListView = new ListView(this);
+		setDateListView(dateListView);
+		ViewGroup parent = (ViewGroup)dateListView.getParent();
+		if ( parent != null) {
+			parent.removeView(dateListView);
+		}
+		orderDateChange_Dialog.setView(dateListView);
 		//配達日変更ボタン
 		Button haitatsuChange_Btn = (Button)orderSet_View.findViewById(R.id.haitatsubi_change);
 		haitatsuChange_Btn.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
 				// TODO 自動生成されたメソッド・スタブ
-				
+				orderDateChange_Dialog.create();
+				orderDateChange_Dialog.show();
 			}
 			
 		});
-		
-		//お届け日をセットするボタン
-		AlertDialog.Builder orderDateChange_Dialog = new AlertDialog.Builder(this);
-		ListView dateListView = new ListView(this);
-		
-		setDateListView(dateListView);
-		final TextView orderDateView = (TextView)orderSet_View.findViewById(R.id.haitatsubi);
 		orderDateChange_Dialog.setPositiveButton("お届け日設定", new DialogInterface.OnClickListener() {
-			
+			//お届け日を発注データベースに格納
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO 自動生成されたメソッド・スタブ
-				orderDateView.setText(text);
 			}
 		});
+		
+		//dateListViewのクリックされた日付データが入る
+		final TextView orderDateView = (TextView)orderSet_View.findViewById(R.id.sendOrder_date);
+		dateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			public void onItemClick(AdapterView<?> adapterView, View view, int position,
+					long id) {
+				// TODO 自動生成されたメソッド・スタブ
+				ListView listView = (ListView) adapterView;
+                // クリックされたアイテムを取得します
+                String item = (String) listView.getItemAtPosition(position);
+				orderDateView.setText("配達希望日　" + item);
+			}
+			
+		});
 	}
+		
+		
 	
 	//納品設定ボタンが押された時、データベースから持ってきてViewにセットする
 	public void setOrderView_from_userDB(View view) {
 		TextView ownerIdView = (TextView)view.findViewById(R.id.ownerId_View);
 		ownerIdView.setText(ownerId);
 		
-		TextView[] orderSet_TxVw = new TextView[] { (TextView)findViewById(R.id.userID_view),
-													(TextView)findViewById(R.id.companyName),
-													(TextView)findViewById(R.id.tantoName_View),
-													(TextView)findViewById(R.id.telNumber_View),
-													(TextView)findViewById(R.id.endDate_View),
-													(TextView)findViewById(R.id.postNumber),
-													(TextView)findViewById(R.id.addressView),};
+		TextView[] orderSet_TxVw = new TextView[] { (TextView)view.findViewById(R.id.userID_view),
+													(TextView)view.findViewById(R.id.company_name),
+													(TextView)view.findViewById(R.id.tantoName_View),
+													(TextView)view.findViewById(R.id.telNumber_View),
+													(TextView)view.findViewById(R.id.endDate_View),
+													(TextView)view.findViewById(R.id.postNumber),
+													(TextView)view.findViewById(R.id.addressView),};
 		
 		UserDBHelper userDBH = new UserDBHelper(this);
 		SQLiteDatabase db_userDB = userDBH.getReadableDatabase();
@@ -868,20 +900,23 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		String[] selectionArgs = new String[] { userId, };
 		Cursor c = db_userDB.rawQuery(sql, selectionArgs);
 		c.moveToFirst();
+		Log.d("companyName", c.getString(1));
 		for (int i = 0;i < orderSet_TxVw.length;i++) {
 			orderSet_TxVw[i].setText(c.getString(i));
+			Log.d("setOrderView_from_userDB()", "0" + i);
 		}
 		
 	}
 	//日付処理
 	public void setDateListView(ListView listView) {
 		Calendar nowCalendar = Calendar.getInstance();
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
 		for (int i = 0;i < 31;i++) {
-			nowCalendar.add(Calendar.DATE, i);
+			nowCalendar.add(Calendar.DATE, 1);
 			DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
-			TextView dateText = new TextView(this);
-			dateText.setText(df.format(nowCalendar.getTime()));
-			listView.addView(dateText);
+			adapter.add(df.format(nowCalendar.getTime()));
+			listView.setAdapter(adapter);
 		}
 	}
+	//
 }
