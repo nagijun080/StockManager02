@@ -1,4 +1,4 @@
-package com.example.stockmanagerforandroid;
+ package com.example.stockmanagerforandroid;
 
 public class CustomData {
 	private String itemId_;

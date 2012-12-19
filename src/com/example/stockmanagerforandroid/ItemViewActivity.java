@@ -152,58 +152,6 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		showItemDB(null, null, null);
 	}
 	
-
-	@Override
-	protected void onStop() {
-		// TODO 自動生成されたメソッド・スタブ
-		super.onStop();
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// TODO 自動生成されたメソッド・スタブ
-		super.onCreateOptionsMenu(menu);
-		getMenuInflater().inflate(R.menu.menu_layout, menu);
-		return true;
-	}
-	String urlSt;
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		url = new EditText(this);
-		url.setText(urlSt);
-		//"設定"用ダイアログ変数
-		AlertDialog.Builder alDia_Buil = new AlertDialog.Builder(this);
-		
-	    switch (item.getItemId()) {
-	    case R.id.ownerData:
-	    	Intent clientIntent = new Intent();
-    		clientIntent.setClass(this, ClientViewActivity.class);
-    		startActivity(clientIntent);
-	        return true;
-	    case R.id.itemList:
-	    	Intent itemViewIntent = new Intent();
-    		itemViewIntent.setClass(this, ItemViewActivity.class);
-    		startActivity(itemViewIntent);
-	        return true;
-	    case R.id.ownerHistory:
-	    	Intent historyViewIntent = new Intent();
-	    	historyViewIntent.setClass(this, HistoryViewActivity.class);
-	    	startActivity(historyViewIntent);
-	    	return true;
-	    case R.id.setting:
-	    	alDia_Buil.setTitle("接続先アドレスを入力");
-	    	alDia_Buil.setView(url);
-	    	alDia_Buil.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				// 設定の中にあるボタンをクリックでネットワークに接続
-				public void onClick(DialogInterface dialog, int which) {
-					// TODO 自動生成されたメソッド・スタブ
-					urlSt = url.getText().toString();
-				}
-	    	}).show();
-	    	return true;
-	    }
-	    return false;
-	}
 	//ItemDBHelperのitemDBテーブルにinsertする
 	public void saveItemDB() {
 		Log.d("saveItemDB()","first");
@@ -243,15 +191,6 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				Log.d("db.update","checkRec : " + String.valueOf(checkRec));
 			}
 			itemDBH.close();
-//			Integer checkRec = null;
-//			if (cur.getString(0).equals(itemImageId[i])) {
-//				checkRec = (Integer)db.update("itemDB", values, "itemImageId = ?", new String[] { itemImageId[i].toString(), });
-//				Log.d("db.update","checkRec : " + String.valueOf(checkRec));
-//			} else {
-//				checkRec = Long.valueOf(db.insert("itemDB", null, values)).intValue();				
-//				Log.d("db.insert","checkIns : " + String.valueOf(checkRec));
-//			}
-//			cur.moveToNext();
 		}
 	}
 	
@@ -392,9 +331,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		itemGenreDBH.close();
 	}
 	
-	//ジャンルボタンを押した時の処理
+	//"ジャンルボタン"を押した時の処理
 	public void showGenDia() {
-		//商品データベースからジャンルを取り出す
 		genreDialog = new AlertDialog.Builder(this);
 		genAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,genre);
 		genreDialog.setPositiveButton("ジャンル選択", this);
@@ -403,7 +341,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		listView.setAdapter(genAdapter);
 		listView.setScrollingCacheEnabled(false);
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			//リスト項目がクリックされた時の処理
+			//"ジャンルリスト"の項目がクリックされた時の処理
 			public void onItemClick(AdapterView<?> adapter, View view, int position,
 					long id) {
 				//選択された項目の場所を取得
@@ -681,8 +619,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	//"カート"ボタンを押したあとの処理
 	//showした"AlertDialog"を返す
 	public AlertDialog.Builder showCartDialog() {
-		LayoutInflater inflate = LayoutInflater.from(this);
-		cartView = inflate.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
+//		LayoutInflater inflate = LayoutInflater.from(this);
+//		cartView = inflate.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
 		ListView listInCart = (ListView)cartView.findViewById(R.id.itemListInCart);
 		
 		List<CustomDialogInCart> objects = new ArrayList<CustomDialogInCart>();
@@ -762,6 +700,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	
 	//"カート"ボタンにクリックリスナ-登録
 	public void cartClick() {
+		LayoutInflater inflate = LayoutInflater.from(this);
+		cartView = inflate.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
 		Button cartButton = (Button)findViewById(R.id.btnCart);
 		cartButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -770,10 +710,10 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				setOrderDB_In_Cart();
 				//"カート"ダイアログの"納品設定"処理
 				orderItem_set();
-				//"カート"ダイアログを表示
-				showCartDialog();
-				//"すべて削除"ボタンの処理
-				setAllDel_Click();
+				//"履歴に保存"ボタンの処理
+				saveHistoryDB();
+				//"すべて削除"ボタンの処理//"カート"ダイアログを表示
+				setAllDel_Click(showCartDialog());
 			}
 		});
 	}
@@ -784,6 +724,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		sendOrderBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				// TODO 自動生成されたメソッド・スタブ
+				//"履歴データベース"に発注情報を保存
+				saveHistoryDB();
 				/* http通信Thread */
 				new Thread( new Runnable() {
 					public void run() {
@@ -955,7 +897,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	
 	//"カート"ボタンを押したあとのダイアログの中の処理
 	//"すべて削除"ボタンにクリックリスナー
-	public void setAllDel_Click() {
+	public void setAllDel_Click(final AlertDialog.Builder dialog) {
 		Button allClearBtn = (Button)cartView.findViewById(R.id.allClear);
 		allClearBtn.setOnClickListener(new OnClickListener() {
 
@@ -963,6 +905,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				// TODO 自動生成されたメソッド・スタブ
 				orderCount = 0;
 				allClear();
+				dialog.create().dismiss();
 			}
 			
 		});
@@ -1012,11 +955,12 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		SQLiteDatabase db_orderDB = orderSetDBH.getWritableDatabase();
 		
 		String sql = "SELECT orderId FROM orderSetDBTable;";
-		Cursor c = db_orderDB.rawQuery(sql, null);
 		try { 
+			Cursor c = db_orderDB.rawQuery(sql, null);
 			c.moveToLast();
 			orderId = c.getInt(0) + 1;
-		} catch (SQLiteException e) {
+		} catch (CursorIndexOutOfBoundsException e) {
+			Log.d("setOrderId_In_DB()", "01");
 			orderId = 1000;
 		}
 		
@@ -1043,14 +987,59 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		ContentValues values = new ContentValues();
 		values.put("status", httpBool.toString());
 		values.put("orderId", orderId);
-		values.put("ownerId", ownerId);
 		values.put("userId", userId);
+		values.put("totalValue", getTotal_In_Cart());
 		try {
 			db_hisDB.insertOrThrow("historyDBTable", null, values);
 		} catch (Exception e) {
 			db_hisDB.update("historyDBTable", values, "orderId = ?", new String[] { orderId.toString(), });
 		}
 		historyDBH.close();
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// TODO 自動生成されたメソッド・スタブ
+		super.onCreateOptionsMenu(menu);
+		getMenuInflater().inflate(R.menu.menu_layout, menu);
+		return true;
+	}
+	String urlSt;
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		url = new EditText(this);
+		url.setText(urlSt);
+		//"設定"用ダイアログ変数
+		AlertDialog.Builder alDia_Buil = new AlertDialog.Builder(this);
 		
+	    switch (item.getItemId()) {
+	    case R.id.ownerData:
+	    	Intent clientIntent = new Intent();
+    		clientIntent.setClass(this, ClientViewActivity.class);
+    		startActivity(clientIntent);
+	        return true;
+	    case R.id.itemList:
+	    	Intent itemViewIntent = new Intent();
+    		itemViewIntent.setClass(this, ItemViewActivity.class);
+    		startActivity(itemViewIntent);
+	        return true;
+	    case R.id.ownerHistory:
+	    	Intent historyViewIntent = new Intent();
+	    	historyViewIntent.setClass(this, HistoryViewActivity.class);
+	    	startActivity(historyViewIntent);
+	    	return true;
+	    case R.id.setting:
+	    	alDia_Buil.setTitle("接続先アドレスを入力");
+	    	alDia_Buil.setView(url);
+	    	alDia_Buil.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				// 設定の中にあるボタンをクリックでネットワークに接続
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO 自動生成されたメソッド・スタブ
+					urlSt = url.getText().toString();
+				}
+	    	}).show();
+	    	return true;
+	    }
+	    return false;
 	}
 }

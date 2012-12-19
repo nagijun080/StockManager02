@@ -19,7 +19,7 @@ public class HistoryDBHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		// TODO 自動生成されたメソッド・スタブ
 		String sql = "CREATE TABLE historyDBTable ( _ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-				"status TEXT, orderId INTEGER UNIQUE, ownerId TEXT, userId TEXT);";
+				"status TEXT, orderId INTEGER UNIQUE, userId TEXT, totalValue INTEGER);";
 		db.execSQL(sql);
 	}
 

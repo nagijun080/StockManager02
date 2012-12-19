@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 public class ClientViewActivity extends Activity {
 
-	//ClientView_layoutの配列
+	//ClientView_layoutの要素配列
 	private int[] userViewId = { R.id.companyName, R.id.chargeName,
 								R.id.contactName, R.id.dateName,
 								R.id.postName, R.id.addressName };
@@ -40,9 +40,7 @@ public class ClientViewActivity extends Activity {
 	
 	
 	public AlertDialog.Builder dialog;
-	public ListView listView;
-	public ArrayAdapter<String> adapter;
-	
+	private final Integer CHECKNUM = 4;
 	//お客様データベース引数
 	public UserDBHelper userDBHel;
 	//発注設定データベース引数
@@ -51,7 +49,8 @@ public class ClientViewActivity extends Activity {
 	public String ownerId = "";
 	//お客様を識別するID
 	public Integer userId;
-	
+	//お客様を検索して、お客様情報をViewに表示させてるかチェックする
+	private boolean checkDiaBtn = false;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
@@ -61,38 +60,47 @@ public class ClientViewActivity extends Activity {
 		//お客様データをデータベースに保存
 		saveUserDB();
 		
-		Log.d("ClientViewActivity()", "01");
-		adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, USERDATA[1]);
-		Log.d("ClientViewActivity()", adapter.getItem(0));
-		//serchButtonにOnClickListener登録
-		final Button serchButton = (Button)findViewById(R.id.serchButton);
+		//"検索ボタン"にクリックリスナー
+		setSerchBtn_Click();
+	}
+	
+	//"検索"ボタンにクリックリスナー
+	public void setSerchBtn_Click() {
+		Button serchButton = (Button)findViewById(R.id.serchButton);
 		serchButton.setOnClickListener(new OnClickListener() {
-			//serchButtonを押したらDialogが表示される
+
 			public void onClick(View v) {
-				Log.d("serchButton.onClick()", "01");
 				// TODO 自動生成されたメソッド・スタブ
-				dialog = new AlertDialog.Builder(ClientViewActivity.this);
-				dialog.setTitle(R.string.guest_name);
-				//ダイアログが表示されてお客様設定ボタンが押された時の処理
-				//layoutにuserIdのお客様の情報を表示
-				dialog.setPositiveButton(R.string.guest_setting, new DialogInterface.OnClickListener() {
-					
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO 自動生成されたメソッド・スタブ
-						showClientView();
-					}
-				});
-				//listViewを生成して、セッティングをする
-				listViewSetting();
-				dialog.setView(listView);
-				dialog.create();
-				dialog.show();
+				showUserDialog();
 			}
 		});
 	}
-	
-	public void listViewSetting() {
-		listView = new ListView(this);
+	//"検索"ボタンを押したあとの処理
+	//"お客様の名前"のダイアログを表示させる
+	public void showUserDialog() {
+		dialog = new AlertDialog.Builder(this);
+		dialog.setTitle(R.string.guest_name);
+		//ダイアログが表示されてお客様設定ボタンが押された時の処理
+		//layoutにuserIdのお客様の情報を表示
+		dialog.setPositiveButton(R.string.guest_setting, new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO 自動生成されたメソッド・スタブ
+				setClientView();
+				checkDiaBtn = true;
+			}
+		});
+		//listViewを生成して、セッティングをする
+		dialog.setView(getListView());
+		dialog.create();
+		dialog.show();
+	}
+	//"検索"ボタンを押した時に表示させるダイアログ
+	//その中にあるListViewを返す
+	public ListView getListView() {
+		//"検索"ボタンを押した時にダイアログで表示させる文字列
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, USERDATA[1]);
+		ListView listView = new ListView(this);
 		listView.setAdapter(adapter);
 		listView.setScrollingCacheEnabled(false);
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -105,23 +113,90 @@ public class ClientViewActivity extends Activity {
 			}
 			
 		});
+		return listView;
 	}
-	/*public void listViewInDialog(ArrayAdapter<String> adapter) {
-		ListView listView = (ListView)findViewById(R.id.listView);
-		listView.setAdapter(adapter);
-		listView.setScrollingCacheEnabled(false);
-		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			//リスト項目がクリックされた時の処理
-			public void onItemClick(AdapterView<?> adapter, View view, int position,
-					long itemId) {
-				// TODO 自動生成されたメソッド・スタブ
-				
-				Toast.makeText(ClientViewActivity.this, "dialog", Toast.LENGTH_LONG).show();
-			}
-			
-		});
-	}*/
 
+	
+	//onCreateでお客様データをデータベースに入れる
+	public void saveUserDB() {
+		userDBHel = new UserDBHelper(this);
+		SQLiteDatabase db = userDBHel.getWritableDatabase();
+		Log.d("saveUserDB()","01");
+		for (int i = 0;i < USERDATA[0].length;i++) {
+			ContentValues values = new ContentValues();
+			values.put("userId", USERDATA[0][i]);
+			values.put("company", USERDATA[1][i]);
+			values.put("name", USERDATA[2][i]);
+			values.put("telNumber", USERDATA[3][i]);
+			values.put("date", USERDATA[4][i]);
+			values.put("postNumber", USERDATA[5][i]);
+			values.put("address", USERDATA[6][i]);
+			Log.d("saveUserDB()","02");
+			try {
+				db.insertOrThrow("userDBTable", null, values);
+				Log.d("saveUserDB()","insert");
+			} catch (SQLiteConstraintException e) {
+				db.update("userDBTable", values, "userId = ?", new String[] { USERDATA[0][i], });
+				Log.d("saveUserDB()","update");
+			}
+		}
+		userDBHel.close();
+	}
+
+
+	//発注者番号がちゃんと4文字の数字で入っているかチェックしてownerIdに入れる
+	public void setCheckOwnerId() {
+		final Integer NUM = 4;
+		EditText ownerIdEt = (EditText)findViewById(R.id.ownerId);
+		String ownerIdSt = ownerIdEt.getText().toString();
+		Log.d("checkOwnerId()","01 : " + ownerIdSt);
+		//ownerIdに文字が空ではないとき(何らかの文字は入っている)
+		if (!("".equals(ownerIdSt))) {
+			//ownerIdの文字が4文字でないとき
+			if (!(NUM.equals(ownerIdSt.length()))) {
+				Toast.makeText(this, "発注者番号の文字数は4文字にしてください。", Toast.LENGTH_SHORT).show();
+			//ownerIdの文字が4文字の時
+			} else {
+				//発注者番号をownerIdに入れる
+				ownerId = ownerIdEt.getText().toString();
+			}
+		//ownerIdが空文字のとき
+		} else {
+			Toast.makeText(this, "発注者番号を入れてください", Toast.LENGTH_SHORT).show();
+		}
+		
+	}
+	//
+	public void setClientView() {
+		userDBHel = new UserDBHelper(this);
+		SQLiteDatabase dbUser = userDBHel.getReadableDatabase();
+		
+		String sql = "SELECT company, name, tenNumber, date, postNumber, address FROM userDBTable WHERE userId = ?;";
+		String[] selectionArgs = { USERDATA[0][userId], };
+		Cursor userCur = dbUser.rawQuery(sql, selectionArgs);
+		userCur.moveToFirst();
+		
+		for (int i = 0;i < userCur.getColumnCount();i++) {
+			//文字数が10文字以上だったら改行して表示
+			//電話番号は改行しない
+			if (!(USERDATA[3][userId].equals(userCur.getString(i))) && userCur.getString(i).length() > 11) {
+				String textBreakFi = userCur.getString(i).substring(0, 9);//10文字区切る
+				String textBreakSe = userCur.getString(i).substring(9);	//11文字目から最後まで
+				Log.d("textBreakSe", textBreakSe);
+				textBreakFi = textBreakFi + "\n" + textBreakSe;
+				Log.d("textBreak", textBreakFi);
+				TextView text = (TextView)findViewById(userViewId[i]);
+				text.setText(textBreakFi);
+			} else {
+				TextView text = (TextView)findViewById(userViewId[i]);
+				text.setText(userCur.getString(i));
+			}
+		}
+		userCur.close();
+		userDBHel.close();
+		
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// TODO 自動生成されたメソッド・スタブ
@@ -133,19 +208,22 @@ public class ClientViewActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Log.d("設定ボタン","01");
-		checkOwnerId();
-		if ((ownerId.equals("") || ownerId.length() != 4) && R.id.setting != item.getItemId()) {
-			Log.d("設定ボタン", "発注者番号が4文字ちゃんと入っていない");
+		setCheckOwnerId();
+		if (!(CHECKNUM.equals(ownerId.length())) && !checkDiaBtn) {
 			return false;
-		} else if (userId == null && R.id.setting != item.getItemId()) {
-			Toast.makeText(this, "お客様情報が入っていません。", Toast.LENGTH_SHORT);
-			return false;
-		} /*else {
-			setOrderSetDB();
-		}*/
+		}
+////		if ((ownerId.equals("") || ownerId.length() != 4) && R.id.setting != item.getItemId()) {
+////			Log.d("設定ボタン", "発注者番号が4文字ちゃんと入っていない");
+////			return false;
+////		} else if (userId == null && R.id.setting != item.getItemId()) {
+////			Toast.makeText(this, "お客様情報が入っていません。", Toast.LENGTH_SHORT);
+////			return false;
+////		} /*else {
+//			setOrderSetDB();
+//		}*/
 		
-		//"設定"用ダイアログ変数
 		final EditText url = new EditText(this);
+		//"設定"用ダイアログ変数
 		AlertDialog.Builder alDia_Buil = new AlertDialog.Builder(this);
 		
 	    switch (item.getItemId()) {
@@ -193,99 +271,5 @@ public class ClientViewActivity extends Activity {
 	    }
 	    return false;
 	}
-	//onCreateでお客様データをとりあえずデータベースに入れる
-	public void saveUserDB() {
-		userDBHel = new UserDBHelper(this);
-		SQLiteDatabase db = userDBHel.getWritableDatabase();
-		Log.d("saveUserDB()","01");
-		for (int i = 0;i < USERDATA[0].length;i++) {
-			ContentValues values = new ContentValues();
-			values.put("userId", USERDATA[0][i]);
-			values.put("company", USERDATA[1][i]);
-			values.put("name", USERDATA[2][i]);
-			values.put("telNumber", USERDATA[3][i]);
-			values.put("date", USERDATA[4][i]);
-			values.put("postNumber", USERDATA[5][i]);
-			values.put("address", USERDATA[6][i]);
-			Log.d("saveUserDB()","02");
-			try {
-				db.insertOrThrow("userDBTable", null, values);
-				Log.d("saveUserDB()","insert");
-			} catch (SQLiteConstraintException e) {
-				db.update("userDBTable", values, "userId = ?", new String[] { USERDATA[0][i], });
-				Log.d("saveUserDB()","update");
-			}
-		}
-		userDBHel.close();
-	}
-
-
-	//ownerIdがちゃんと4文字の数字で入っているかチェックする
-	public void checkOwnerId() {
-		Integer NUM = 4;
-		EditText ownerIdVw = (EditText)findViewById(R.id.ownerId);
-		Log.d("checkOwnerId()","01 : " + String.valueOf(ownerIdVw.getText().toString().length()));
-		try {
-		//入っている場合4文字か？
-			if (!(NUM.equals(ownerIdVw.getText().toString().length()))) {
-				Toast.makeText(this, "発注者番号の文字数は4文字にしてください。", Toast.LENGTH_SHORT).show();
-			} else {
-				/*setOrderSetDB();*/
-				//発注者番号をownerIdに入れる
-				ownerId = ownerIdVw.getText().toString();
-			}
-		} catch (Exception e) {
-		//何も入ってない場合(null)
-			Toast.makeText(this, "発注者番号を入れてください", Toast.LENGTH_SHORT).show();
-		}
-		Log.d("checkOwnerId()", "02 : " + ownerId);
-	}
-	/*//発注者番号とお客様番号を発注設定データベースに保存
-	//これが実行される時、ownerIdがちゃんと入ってない場合実行しない
-	public void setOrderSetDB() {
-		orderSetDBHel = new OrderSetDBHelper(this);
-		SQLiteDatabase dbOrder = orderSetDBHel.getWritableDatabase();
-		
-		ContentValues orderVal = new ContentValues();
-		orderVal.put("ownerId", ownerId);
-		orderVal.put("userId", USERDATA[0][userId]);
-		dbOrder.insertOrThrow("orderSetDBTable", null, orderVal);
-		Log.d("setOrderSetDB()", "01 : inserOk");
-		
-		orderSetDBHel.close();
-	}*/
-	//お客様情報をデータベースから持ってきて、表示させるメソッド
-	public void showClientView() {
-		userDBHel = new UserDBHelper(this);
-		SQLiteDatabase dbUser = userDBHel.getReadableDatabase();
-		String[] userColumns = { /*"userId",*/ "company", "name", "telNumber", "date", "postNumber", "address", };
-		String select = "userId = ?";
-		
-		Cursor userCur = dbUser.query("userDBTable", userColumns, select, new String[] { USERDATA[0][userId] }, null, null, null);
-		userCur.moveToFirst();
-		
-		for (int i = 0;i < userColumns.length;i++) {
-			//文字数が10文字以上だったら改行して表示
-			//電話番号は改行しない
-			if (!(USERDATA[3][userId].equals(userCur.getString(i))) && userCur.getString(i).length() > 11) {
-				String textBreakFi = userCur.getString(i).substring(0, 9);//10文字区切る
-				String textBreakSe = userCur.getString(i).substring(9);	//11文字目から最後まで
-				Log.d("textBreakSe", textBreakSe);
-				textBreakFi = textBreakFi + "\n" + textBreakSe;
-				Log.d("textBreak", textBreakFi);
-				TextView text = (TextView)findViewById(userViewId[i]);
-				text.setText(textBreakFi);
-			} else {
-				TextView text = (TextView)findViewById(userViewId[i]);
-				text.setText(userCur.getString(i));
-			}
-		}
-		userCur.close();
-		userDBHel.close();
-		
-	}
-	
-	//このActivityが走ったときにお客様情報を表示する
-	//
 
 }

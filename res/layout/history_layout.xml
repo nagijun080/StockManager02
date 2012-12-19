@@ -138,7 +138,6 @@
                 android:layout_marginBottom="30dp"
                 android:background="#c8c8c8"
                 android:paddingBottom="10dp" >
-
             </ListView>
 
         </TableLayout>
