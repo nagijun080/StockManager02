@@ -5,13 +5,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class OrderSetDBHelper extends SQLiteOpenHelper {
-	
-	private static final String DB_NAME = "orderSetDatabase.db";
+public class HistoryDBHelper extends SQLiteOpenHelper {
+	private static final String DB_NAME = "historyDB.db";
 	private static final int DB_VERSION = 1;
-	private static OrderSetDBHelper orderSetDBHelper;
+	private static HistoryDBHelper historyDBHelper;
 
-	public OrderSetDBHelper(Context context) {
+	public HistoryDBHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
 		// TODO 自動生成されたコンストラクター・スタブ
 	}
@@ -19,10 +18,9 @@ public class OrderSetDBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		// TODO 自動生成されたメソッド・スタブ
-		String sql = "CREATE TABLE orderSetDBTable ( _ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-				+ " orderId INTEGER, ownerId TEXT, userId INTEGER, url TEXT, itemImageId INTEGER, item_num INTEGER, sumValue INTEGER, orderDate TEXT);";
+		String sql = "CREATE TABLE historyDBTable ( _ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+				"status TEXT, orderId INTEGER UNIQUE, ownerId TEXT, userId TEXT);";
 		db.execSQL(sql);
-		
 	}
 
 	@Override

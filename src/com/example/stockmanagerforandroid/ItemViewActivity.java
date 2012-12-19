@@ -112,11 +112,17 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	//カートボタンを押した時のダイアログ
 	AlertDialog.Builder cartDialog;
 	View cartView;
+	//発注した時に設定するID。発注ごとに違う
+	//1000からスタートする
+	public Integer orderId;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
 		super.onCreate(savedInstanceState);	
 		urlSt = "172.16.80.35/android/index.php/?";
+		//発注IDをデータベースに格納
+		//発注するたびに増える
+		setOrderId_In_DB();
 		//LayoutのvalueViewだけ改行処理
 		setContentView(R.layout.item_view_layout);
 		TextView valueV = (TextView)findViewById(R.id.valueView);
@@ -145,6 +151,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		//itemDBテーブルのデータベースに入っているデータを全部出す
 		showItemDB(null, null, null);
 	}
+	
 
 	@Override
 	protected void onStop() {
@@ -510,7 +517,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		valText.setText("条件 : \n" + min + " ～ " + max);
 	}
 	
-	//商品のリストクリックした時の処理
+	//リストの商品をクリックした時の処理
 	public void itemListClick() {
 		ListView itemList = (ListView)findViewById(R.id.imageList);
 		itemList.setOnItemClickListener(new OnItemClickListener() {
@@ -525,7 +532,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		});
 		
 	}
-	//商品のリストをクリックした時ダイアログを表示させる
+	//リストの表示クリックした時ダイアログを表示させる
 	//buyViewにinflateしてレイアウトが使えるようにしている
 	//onCreateで入れてもいいかな？
 	public void showListDialog() {
@@ -639,6 +646,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		OrderSetDBHelper orderSet_DBH = new OrderSetDBHelper(this);
 		SQLiteDatabase db_order = orderSet_DBH.getWritableDatabase();
 		ContentValues order_values = new ContentValues();
+		order_values.put("orderId", orderId);
 		order_values.put("ownerId", ownerId);
 		order_values.put("userId", userId);
 		order_values.put("itemImageId", item_ImageId);
@@ -670,8 +678,9 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		
 	}
 	
-	//btnCartを押したあとの処理
-	public void setDiaInCart() {
+	//"カート"ボタンを押したあとの処理
+	//showした"AlertDialog"を返す
+	public AlertDialog.Builder showCartDialog() {
 		LayoutInflater inflate = LayoutInflater.from(this);
 		cartView = inflate.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
 		ListView listInCart = (ListView)cartView.findViewById(R.id.itemListInCart);
@@ -695,8 +704,10 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		dialogBuilder.setView(cartView);
 		//http通信
 		sendOrder();
+		
 		dialogBuilder.create();
 		dialogBuilder.show();
+		return dialogBuilder;
 	}
 	/*あとで配列に全部入れる。今はテスト */
 	//発注したい情報をOrderSetDBから入れる変数
@@ -708,10 +719,10 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	String[] itemName_In_ItemDB = new String[10];
 	String[] itemData_In_ItemDB = new String[10];
 	String[] unitPrice_In_ItemDB = new String[10];
-	//カートの中に入っている商品数-1
+	//カートの中に入っている商品数
 	int orderCount = 0;
 	int roopCount;
-	//btnCartを押した時、データベースから発注情報を持ってくる
+	//"カート"ボタンを押した時、データベースから発注情報を持ってくる
 	public void setOrderDB_In_Cart() {
 		OrderSetDBHelper orderDB = new OrderSetDBHelper(this);
 		SQLiteDatabase db_order = orderDB.getReadableDatabase();
@@ -724,8 +735,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			itemNum_In_OrderDB[i] = cur.getInt(2);
 			Log.d("setOrderDB()","01 : " + cur.getInt(2));
 			minTotal_In_OrderDB[i] = cur.getInt(3);
-			cur.moveToNext();
 			orderCount++;
+			cur.moveToNext();
 		}
 		orderDB.close(); 
 		
@@ -749,22 +760,25 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		itemDBH.close();
 	}
 	
-	//cartBtnをにクリックリスナ-登録
+	//"カート"ボタンにクリックリスナ-登録
 	public void cartClick() {
 		Button cartButton = (Button)findViewById(R.id.btnCart);
 		cartButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				// TODO 自動生成されたメソッド・スタブ				
+				// TODO 自動生成されたメソッド・スタブ	
+				//"カート"の中に入っている商品を一旦配列に入れる
 				setOrderDB_In_Cart();
-				setDiaInCart();
-				//カート中の納品設定処理
+				//"カート"ダイアログの"納品設定"処理
 				orderItem_set();
-				orderCount = 0;
+				//"カート"ダイアログを表示
+				showCartDialog();
+				//"すべて削除"ボタンの処理
+				setAllDel_Click();
 			}
 		});
 	}
 	Boolean httpBool = false;
-	//cart内の発注送信
+	//"カート"内の"この内容で発注送信"ボタンにクリックリスナー
 	public void sendOrder() {
 		Button sendOrderBtn = (Button)cartView.findViewById(R.id.sendOrderBtn);
 		sendOrderBtn.setOnClickListener(new OnClickListener() {
@@ -776,7 +790,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 						for (int i = 0;i < roopCount;i++) {
 							HttpConnection httpConect = new HttpConnection();
 							String url_ = "http://" + urlSt;
-							String uri = "ownerId:=" + ownerId + "&" + "itemId:=" + itemId_In_ItemDB[i] + "&"
+							String uri = "orderId:=" + orderId.toString() + "&" + "ownerId:=" + ownerId + "&" + "itemId:=" + itemId_In_ItemDB[i] + "&"
 										+ "unitPrice:=" + unitPrice_In_ItemDB[i] + "&" + "itemNum:=" + itemNum_In_OrderDB[i] 
 										+ "&" + "itemMinTotal:=" + minTotal_In_OrderDB[i];
 							String response = httpConect.doGet(url_ + uri);
@@ -791,6 +805,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 					}
 				}).start();
 				/* http通信Thread終了 */
+				//新しい発注IDを取得
+				setOrderId_In_DB();
 			}			
 		});
 	}
@@ -807,27 +823,35 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	
 	AlertDialog.Builder orderSet_Dialog;
 	
-	//カートダイアログ納品設定処理
+	//"カート"ボタンpush↓
+	//ダイアログ表示↓
+	//"納品設定"ボタンにクリックリスナー↓
+	/* "納品設定"ボタンを押したあとの処理 */
 	public void orderItem_set() {
-		Log.d("orderItem_set()", "01");
+		//dateListViewのクリックされた日付データが入る
 		LayoutInflater inflater = LayoutInflater.from(this);
-		//納品設定ボタン
 		//View cart_dialogView = inflater.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
 		final View orderSet_View = inflater.inflate(R.layout.order_set_dialog_layout, (ViewGroup)findViewById(R.id.orderSet_dialog_Ll));
+		final TextView orderDateView = (TextView)orderSet_View.findViewById(R.id.sendOrder_date);
+		Log.d("orderItem_set()", "01");
 		Button deliBtn = (Button)cartView.findViewById(R.id.deliveryBtn);
-		//ownerIdを元に各Widgetにデータベースから持ってきてset
 		deliBtn.setOnClickListener(new OnClickListener() {	
+			//"納品設定"ボタン
 			public void onClick(View v) {
 				Log.d("orderItem_set()", "02");
 				// TODO 自動生成されたメソッド・スタブ
 				orderSet_Dialog = new AlertDialog.Builder(ItemViewActivity.this);
 				orderSet_Dialog.setPositiveButton("納品情報を設定", new DialogInterface.OnClickListener() {
-					//発注データベースに配達日も含め保存する
+					//"納品情報を設定"ボタン
 					public void onClick(DialogInterface dialog, int which) {
 						// TODO 自動生成されたメソッド・スタブ
+						//お届け日を発注データベースに格納
+						orderDate_setDB(); 
+						
 					}
 					
 				});
+				//ownerIdを元に各Widgetにデータベースから持ってきてset
 				setOrderView_from_userDB(orderSet_View);
 				//orderSet_Viewに納品設定のlayoutをセット
 				orderSet_Dialog.setView(orderSet_View);
@@ -839,13 +863,15 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		
 		final AlertDialog.Builder orderDateChange_Dialog = new AlertDialog.Builder(this);
 		ListView dateListView = new ListView(this);
+		
 		setDateListView(dateListView);
+		
 		ViewGroup parent = (ViewGroup)dateListView.getParent();
 		if ( parent != null) {
 			parent.removeView(dateListView);
 		}
 		orderDateChange_Dialog.setView(dateListView);
-		//配達日変更ボタン
+		//"配達日変更"ボタン
 		Button haitatsuChange_Btn = (Button)orderSet_View.findViewById(R.id.haitatsubi_change);
 		haitatsuChange_Btn.setOnClickListener(new OnClickListener() {
 
@@ -857,31 +883,29 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			
 		});
 		orderDateChange_Dialog.setPositiveButton("お届け日設定", new DialogInterface.OnClickListener() {
-			//お届け日を発注データベースに格納
+			//"お届け日設定"ボタン
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO 自動生成されたメソッド・スタブ
+				orderDateView.setText("配達希望日　" + orderDateTx);
 			}
 		});
 		
-		//dateListViewのクリックされた日付データが入る
-		final TextView orderDateView = (TextView)orderSet_View.findViewById(R.id.sendOrder_date);
 		dateListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
+			//"配達日変更"ボタンを押したあとのListViewItemClick
 			public void onItemClick(AdapterView<?> adapterView, View view, int position,
 					long id) {
 				// TODO 自動生成されたメソッド・スタブ
 				ListView listView = (ListView) adapterView;
                 // クリックされたアイテムを取得します
-                String item = (String) listView.getItemAtPosition(position);
-				orderDateView.setText("配達希望日　" + item);
+                orderDateTx = (String) listView.getItemAtPosition(position);
 			}
 			
 		});
 	}
 		
-		
+	String orderDateTx;
 	
-	//納品設定ボタンが押された時、データベースから持ってきてViewにセットする
+	//"納品設定"ボタンが押された時、データベースから持ってきてViewにセットする
 	public void setOrderView_from_userDB(View view) {
 		TextView ownerIdView = (TextView)view.findViewById(R.id.ownerId_View);
 		ownerIdView.setText(ownerId);
@@ -918,5 +942,115 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			listView.setAdapter(adapter);
 		}
 	}
-	//
+	//"納品情報を設定"ボタンを押した時の処理
+	//配達日をorderSetDBTableに格納
+	public void orderDate_setDB() {
+		OrderSetDBHelper orderSetDB = new OrderSetDBHelper(this);
+		SQLiteDatabase db_order = orderSetDB.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put("orderDate", orderDateTx);
+		db_order.update("orderSetDBTable", values, "ownerId = ?", new String[]{ ownerId, });
+		orderSetDB.close();
+	}
+	
+	//"カート"ボタンを押したあとのダイアログの中の処理
+	//"すべて削除"ボタンにクリックリスナー
+	public void setAllDel_Click() {
+		Button allClearBtn = (Button)cartView.findViewById(R.id.allClear);
+		allClearBtn.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+				orderCount = 0;
+				allClear();
+			}
+			
+		});
+	}
+	
+	//"すべて削除"ボタンを押したあとの処理
+	//"カート"の中とデータベースと配列から商品を削除する
+	public void allClear() {
+		ListView cartList = (ListView)cartView.findViewById(R.id.itemListInCart);
+		ArrayAdapter adapter = (ArrayAdapter)cartList.getAdapter();
+		adapter.clear();
+		
+		OrderSetDBHelper orderDBH = new OrderSetDBHelper(this);
+		SQLiteDatabase db_order = orderDBH.getWritableDatabase();
+		db_order.delete("orderSetDBTable", "orderId = ?", new String[] { orderId.toString(), });
+		orderDBH.close();
+		
+		//発注したい情報をOrderSetDBから入れる変数
+		imageId_In_OrderDB = new Integer[10];
+		itemNum_In_OrderDB = new Integer[10];
+		minTotal_In_OrderDB = new Integer[10];
+		//imageId_In_OrderDBを元にItemDBHelperから情報と得る
+		itemId_In_ItemDB = new String[10];
+		itemName_In_ItemDB = new String[10];
+		itemData_In_ItemDB = new String[10];
+		unitPrice_In_ItemDB = new String[10];
+	}
+	
+	//"カート"ボタンを押した時に"カート"の中にあるすべての合計値を返す
+	public Integer getTotal_In_Cart() {
+		Integer total = 0;
+		for (int i = 0;i < orderCount;i++) {
+			total += minTotal_In_OrderDB[i];
+		}
+		return total;
+	}
+	
+	//"カート"内の合計値を"カート"ダイアログに表示
+	public void showCartTotal() {
+		TextView totalView = (TextView)cartView.findViewById(R.id.totalView);
+		totalView.setText("合計：" + getTotal_In_Cart());
+	}
+	
+	//商品の発注IDをデータベースに格納
+	public void setOrderId_In_DB() {
+		OrderSetDBHelper orderSetDBH = new OrderSetDBHelper(this);
+		SQLiteDatabase db_orderDB = orderSetDBH.getWritableDatabase();
+		
+		String sql = "SELECT orderId FROM orderSetDBTable;";
+		Cursor c = db_orderDB.rawQuery(sql, null);
+		try { 
+			c.moveToLast();
+			orderId = c.getInt(0) + 1;
+		} catch (SQLiteException e) {
+			orderId = 1000;
+		}
+		
+		orderSetDBH.close();
+	}
+	
+	//"履歴に保存"ボタンにクリックリスナー
+	public void setHistory_Click() {
+		Button historyBtn = (Button)cartView.findViewById(R.id.historySaveBtn);
+		historyBtn.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				// TODO 自動生成されたメソッド・スタブ
+				saveHistoryDB();
+			}
+			
+		});
+	}
+	
+	//"履歴に保存"ボタンでHistoryDBに格納
+	public void saveHistoryDB() {
+		HistoryDBHelper historyDBH = new HistoryDBHelper(this);
+		SQLiteDatabase db_hisDB = historyDBH.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put("status", httpBool.toString());
+		values.put("orderId", orderId);
+		values.put("ownerId", ownerId);
+		values.put("userId", userId);
+		try {
+			db_hisDB.insertOrThrow("historyDBTable", null, values);
+		} catch (Exception e) {
+			db_hisDB.update("historyDBTable", values, "orderId = ?", new String[] { orderId.toString(), });
+		}
+		historyDBH.close();
+		
+	}
 }
