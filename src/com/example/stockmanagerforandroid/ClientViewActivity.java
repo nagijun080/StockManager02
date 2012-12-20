@@ -145,7 +145,7 @@ public class ClientViewActivity extends Activity {
 
 
 	//発注者番号がちゃんと4文字の数字で入っているかチェックしてownerIdに入れる
-	public void setCheckOwnerId() {
+	public boolean getCheckOwnerId() {
 		final Integer NUM = 4;
 		EditText ownerIdEt = (EditText)findViewById(R.id.ownerId);
 		String ownerIdSt = ownerIdEt.getText().toString();
@@ -155,14 +155,17 @@ public class ClientViewActivity extends Activity {
 			//ownerIdの文字が4文字でないとき
 			if (!(NUM.equals(ownerIdSt.length()))) {
 				Toast.makeText(this, "発注者番号の文字数は4文字にしてください。", Toast.LENGTH_SHORT).show();
+				return false;
 			//ownerIdの文字が4文字の時
 			} else {
 				//発注者番号をownerIdに入れる
 				ownerId = ownerIdEt.getText().toString();
+				return true;
 			}
 		//ownerIdが空文字のとき
 		} else {
 			Toast.makeText(this, "発注者番号を入れてください", Toast.LENGTH_SHORT).show();
+			return false;
 		}
 		
 	}
@@ -171,7 +174,7 @@ public class ClientViewActivity extends Activity {
 		userDBHel = new UserDBHelper(this);
 		SQLiteDatabase dbUser = userDBHel.getReadableDatabase();
 		
-		String sql = "SELECT company, name, tenNumber, date, postNumber, address FROM userDBTable WHERE userId = ?;";
+		String sql = "SELECT company, name, telNumber, date, postNumber, address FROM userDBTable WHERE userId = ?;";
 		String[] selectionArgs = { USERDATA[0][userId], };
 		Cursor userCur = dbUser.rawQuery(sql, selectionArgs);
 		userCur.moveToFirst();
@@ -205,24 +208,17 @@ public class ClientViewActivity extends Activity {
 		return true;
 	}
 	
+	EditText urlEt;
+	String urlSt = "http://172.16.80.35/android/index.php/?";
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Log.d("設定ボタン","01");
-		setCheckOwnerId();
-		if (!(CHECKNUM.equals(ownerId.length())) && !checkDiaBtn) {
+		if (!getCheckOwnerId() && R.id.setting != item.getItemId()) {
 			return false;
 		}
-////		if ((ownerId.equals("") || ownerId.length() != 4) && R.id.setting != item.getItemId()) {
-////			Log.d("設定ボタン", "発注者番号が4文字ちゃんと入っていない");
-////			return false;
-////		} else if (userId == null && R.id.setting != item.getItemId()) {
-////			Toast.makeText(this, "お客様情報が入っていません。", Toast.LENGTH_SHORT);
-////			return false;
-////		} /*else {
-//			setOrderSetDB();
-//		}*/
 		
-		final EditText url = new EditText(this);
+		urlEt = new EditText(this);
+		urlEt.setText(urlSt);
 		//"設定"用ダイアログ変数
 		AlertDialog.Builder alDia_Buil = new AlertDialog.Builder(this);
 		
@@ -250,20 +246,12 @@ public class ClientViewActivity extends Activity {
 	    	return true;
 	    case R.id.setting:
 	    	alDia_Buil.setTitle("接続先アドレスを入力");
-	    	alDia_Buil.setView(url);
+	    	alDia_Buil.setView(urlEt);
 	    	alDia_Buil.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				// 設定の中にあるボタンをクリックでネットワークに接続
 				public void onClick(DialogInterface dialog, int which) {
 					// TODO 自動生成されたメソッド・スタブ
-					/* http通信のテスト */
-					new Thread( new Runnable() {
-						public void run() {
-							HttpConnection httpConect = new HttpConnection();
-							String response = httpConect.doGet("http://" + url.getText().toString());
-							System.out.println("Response : " + response);
-						}
-					}).start();
-					/* http通信のテスト終了 */
+					urlSt = urlEt.getText().toString();
 				}
 			}).show();
 	    	

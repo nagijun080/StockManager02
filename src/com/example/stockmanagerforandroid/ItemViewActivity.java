@@ -44,7 +44,7 @@ import android.widget.Toast;
 
 public class ItemViewActivity extends Activity implements OnClickListener, DialogInterface.OnClickListener{
 
-	private static final int ERROR = 9999;
+	/* 商品データ配列　*/
 	//macの商品画像ID配列
 	public Integer[] itemImageId = { R.drawable.imac_215, R.drawable.imac_27,
 								R.drawable.ipad_mini_bk, R.drawable.ipad_mini_whi,
@@ -62,6 +62,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 								"デュアルコアIntel Core i7", "デュアルコアIntel Core i7",	};
 	//商品のジャンル配列
 	public String[] genre = { "なし", "DeskTop", "Tablet", "NoteBook" };
+	/* 商品データ配列ここまで　*/
 	
 	ItemDBHelper itemDBH;
 	ItemGenreDBHelper itemGenreDBH;
@@ -102,8 +103,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public View itemRowVw;
 	
 	public EditText url;
-	//item_buy_layoutを使うための引数
-	//inflateして使う
+	//"商品の詳細"ダイアログ。ListViewをクリックしたら表示
 	public View buyView;
 	//intentでClientViewからownerIdとuserIdをもらってくる
 	public String ownerId;
@@ -119,12 +119,13 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO 自動生成されたメソッド・スタブ
 		super.onCreate(savedInstanceState);	
+		setContentView(R.layout.item_view_layout);
+		//itemDBにデータを入れる
+		saveItemDB();
 		urlSt = "172.16.80.35/android/index.php/?";
-		//発注IDをデータベースに格納
-		//発注するたびに増える
+		//発注ID。発注するたびにorderIdに＋１される
 		setOrderId_In_DB();
 		//LayoutのvalueViewだけ改行処理
-		setContentView(R.layout.item_view_layout);
 		TextView valueV = (TextView)findViewById(R.id.valueView);
 		valueV.setText("価格を\n絞り込む");
 		
@@ -145,10 +146,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		rowButton.setOnClickListener(this);
 		
 		itemListClick();
-		//itemDBにデータを入れる
-		saveItemDB();
 		
-		//itemDBテーブルのデータベースに入っているデータを全部出す
+		//itemDBテーブルに入っているデータをListViewに表示
 		showItemDB(null, null, null);
 	}
 	
@@ -199,6 +198,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	//引数2:selectArgs　条件カラムに代入する文字列
 	/*genre別に*/
 	public void showItemDB(String select, String[] selectArgs, String orderBy){
+		ItemDBHelper itemDBH = new ItemDBHelper(this);
 		SQLiteDatabase db = itemDBH.getWritableDatabase();
 		ListView imageList = (ListView)findViewById(R.id.imageList);
 		String[] colmns = { "itemId", "itemImageId", "itemName", "itemValue", "itemData", "genre"};
@@ -207,7 +207,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		String[][] item = new String[c.getCount()][colmns.length];
 		if (c != null && c.getCount() != 0) {
 			c.moveToFirst();
-			Log.d("showItemDB()","12" + c.getString(1));
+			Log.d("showItemDB()","12" + c.getString(0));
 			for (int i = 0;i < c.getCount();i++) {
 				for (int j = 0;j < colmns.length;j++) {
 					item[i][j] = c.getString(j);
@@ -455,7 +455,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		valText.setText("条件 : \n" + min + " ～ " + max);
 	}
 	
-	//リストの商品をクリックした時の処理
+	//"商品リスト"にクリックリスナー
 	public void itemListClick() {
 		ListView itemList = (ListView)findViewById(R.id.imageList);
 		itemList.setOnItemClickListener(new OnItemClickListener() {
@@ -463,6 +463,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			public void onItemClick(AdapterView<?> adapter, View view, int position,
 					long id) {
 				// TODO 自動生成されたメソッド・スタブ
+				//商品の詳細ダイアログを表示
 				showListDialog();
 				setListDiaView(view);
 			}
@@ -470,22 +471,23 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		});
 		
 	}
-	//リストの表示クリックした時ダイアログを表示させる
+	//リストをクリックした時ダイアログを表示させる
 	//buyViewにinflateしてレイアウトが使えるようにしている
-	//onCreateで入れてもいいかな？
 	public void showListDialog() {
 		LayoutInflater inflater = LayoutInflater.from(this);
-		//ダイアログのView
+		//"商品の詳細ダイアログ"のView
 		buyView = inflater.inflate(R.layout.item_buy_layout, (ViewGroup)findViewById(R.id.itemBuyLayout));
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setView(buyView);
 		//クリックしたら買えるようにする
-		alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		alertDialog.setPositiveButton("買い物カゴに追加", new DialogInterface.OnClickListener() {
 
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO 自動生成されたメソッド・スタブ
 				setOrder_DB();
-				addNum_CartView();
+				setTotalNumView();
+				//商品数初期化
+				item_count = 1;
 			}
 			
 		});
@@ -508,14 +510,6 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		cur.moveToFirst();
 		Log.d("setListDiaView(view)","itemId:" + cur.getString(0));
 		setBuyLayout(cur);
-//		LayoutInflater inflater = LayoutInflater.from(this);
-//		//ダイアログのView
-//		buyView = inflater.inflate(R.layout.item_buy_layout, (ViewGroup)findViewById(R.id.itemBuyLayout), true);
-//		TextView itemIdView = (TextView)buyView.findViewById(R.id.itemNumber);
-//		itemIdView.setText("品番:" + cur.getString(0));
-//		ImageView itemImageVw = (ImageView)buyView.findViewById(R.id.itemImage);
-//		itemImageVw.setImageResource(cur.getInt(1));
-				
 	}
 	
 	//引数：データベースのカーソル
@@ -527,31 +521,42 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	//商品画像が入っているリソースID
 	Integer item_ImageId;
 	public void setBuyLayout(Cursor c) {
+		TextView item_numView = (TextView)buyView.findViewById(R.id.itemCount);
+		item_numView.setText("個数：" + item_count);
+		
 		TextView itemIdView = (TextView)buyView.findViewById(R.id.itemNumber);
 		itemIdView.setText("品番:" + c.getString(0));
+		
 		ImageView itemImageVw = (ImageView)buyView.findViewById(R.id.itemImage);
 		item_ImageId = c.getInt(1);
 		itemImageVw.setImageResource(item_ImageId);
-		//itemValueだけ小計に使うので別変数に入れる
+		
+		//小計に使うので別変数に入れる
 		TextView valueView = (TextView)buyView.findViewById(R.id.value);
 		value = c.getInt(2);
-		valueView.setText("単価：" + String.valueOf(value));
+		valueView.setText("単価：" + value);
+		
+		TextView minTotalVw = (TextView)buyView.findViewById(R.id.minTotal);
+		minTotalVw.setText("小計：" + value);
 		
 		TextView nameView = (TextView)buyView.findViewById(R.id.itemName);
 		nameView.setText(c.getString(3));
+		
 		TextView dataView = (TextView)buyView.findViewById(R.id.itemData);
 		dataView.setText(c.getString(4));
+		//商品の個数を変更する
 		item_Num_ValueChange(c);
 	}
 	//個数を入れる引数
 	//showListDialog()内のPositiveButtonでitem_numを発注データベースに保存する
-	int item_count;
+	Integer item_count = 1;
 	//価格の小計
 	Integer item_mSumValue;
-	//item_buy_layoutの個数変更ボタンの処理
+	//"商品詳細ダイアログ"の"個数変更"ボタンの処理
 	public void item_Num_ValueChange(final Cursor c) {
 		final TextView item_numView = (TextView)buyView.findViewById(R.id.itemCount);
 		final TextView item_mTotalView = (TextView)buyView.findViewById(R.id.minTotal);
+		
 		Button downButton = (Button)buyView.findViewById(R.id.downButton);
 		downButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -559,7 +564,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				if (!(item_count <= 1)) {
 					item_count--;
 				}
-				item_numView.setText("個数：" + String.valueOf(item_count));
+				item_numView.setText("個数：" + item_count);
 				item_mSumValue = c.getInt(2) * item_count;
 				item_mTotalView.setText("小計：" + item_mSumValue);
 				
@@ -571,15 +576,15 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			public void onClick(View v) {
 				// TODO 自動生成されたメソッド・スタブ
 				item_count++;
-				item_numView.setText("個数：" + String.valueOf(item_count)); 
+				item_numView.setText("個数：" + item_count); 
 				item_mSumValue = c.getInt(2) * item_count;
 				item_mTotalView.setText("小計：" + item_mSumValue);
 			}
 		});
 	}
 	
-	//OrderSetDBHelperのorderSetDBTableにinsertOrUpdateする
-	//item_buy_layoutのPositiveButtonでデータベースにinsertする
+	//orderSetDBTableにinsertする
+	//"商品詳細ダイアログ"の"買い物カゴに追加"ボタンでデータベースにinsertする
 	public void setOrder_DB() {
 		OrderSetDBHelper orderSet_DBH = new OrderSetDBHelper(this);
 		SQLiteDatabase db_order = orderSet_DBH.getWritableDatabase();
@@ -595,32 +600,26 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		orderSet_DBH.close();
 	}
 	
-	//item_buy_layoutのPositiveBtnが押されたら
-	//item_view_layoutのitemNum_viewに個数を反映させる
-	public void addNum_CartView() {
+	//"商品詳細ダイアログ"の"買い物カゴに追加"ボタンで
+	//"商品リスト"layoutの"買い物カゴ"Viewに個数を反映させる
+	public void setTotalNumView() {
 		OrderSetDBHelper orderSet_DBH = new OrderSetDBHelper(this);
 		SQLiteDatabase db_order = orderSet_DBH.getReadableDatabase();
+		
 		String sql = "SELECT ownerId, itemImageId FROM orderSetDBTable WHERE ownerId = ? GROUP BY itemImageId;";
 		Cursor cur = db_order.rawQuery(sql, new String[] { ownerId, });
-		int count = 0;
-		cur.moveToFirst();
-		for (int i = 0;i < cur.getCount();i++) {
-			count++;
-			cur.moveToNext();
-		}
-		int itemType_num = count;
+		Integer itemType_num = cur.getCount();
 		Log.d("addNum_CartView","商品の種類別個数" + String.valueOf(itemType_num));
 		orderSet_DBH.close();			
+		
 		TextView itemNum_View = (TextView)findViewById(R.id.itemNum_view);
-		itemNum_View.setText(String.valueOf(itemType_num));
+		itemNum_View.setText(itemType_num);
 		
 	}
 	
 	//"カート"ボタンを押したあとの処理
 	//showした"AlertDialog"を返す
 	public AlertDialog.Builder showCartDialog() {
-//		LayoutInflater inflate = LayoutInflater.from(this);
-//		cartView = inflate.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
 		ListView listInCart = (ListView)cartView.findViewById(R.id.itemListInCart);
 		
 		List<CustomDialogInCart> objects = new ArrayList<CustomDialogInCart>();
@@ -659,6 +658,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	String[] unitPrice_In_ItemDB = new String[10];
 	//カートの中に入っている商品数
 	int orderCount = 0;
+	//http通信をする回数 = カートに入れた回数
 	int roopCount;
 	//"カート"ボタンを押した時、データベースから発注情報を持ってくる
 	public void setOrderDB_In_Cart() {
@@ -758,7 +758,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		OrderSetDBHelper orderSetDBH = new OrderSetDBHelper(this);
 		SQLiteDatabase db_orderDB = orderSetDBH.getWritableDatabase();
 		ContentValues values = new ContentValues();
-		values.put("url", urlSt);
+		values.put("urlEt", urlSt);
 		db_orderDB.update("orderSetDBTable", values, "ownerId = ?", new String[]{ ownerId, });
 		orderSetDBH.close();
 	}
