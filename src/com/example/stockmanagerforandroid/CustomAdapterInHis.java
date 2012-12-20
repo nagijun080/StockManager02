@@ -39,10 +39,10 @@ public class CustomAdapterInHis extends ArrayAdapter<CustomHistoryList> {
 		userView.setText(item.getUserId());
 		
 		TextView orderView = (TextView)convertView.findViewById(R.id.orderID);
-		orderView.setText(item.getOrderId());
+		orderView.setText(item.getOrderId().toString());
 		
 		TextView totalView = (TextView)convertView.findViewById(R.id.totalValue);
-		totalView.setText(item.getTotalValue());
+		totalView.setText(item.getTotalValue().toString());
 		
 		return convertView;
 	}

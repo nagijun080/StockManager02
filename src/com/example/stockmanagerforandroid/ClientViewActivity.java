@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 public class ClientViewActivity extends Activity {
 
+	/* お客様データ */
 	//ClientView_layoutの要素配列
 	private int[] userViewId = { R.id.companyName, R.id.chargeName,
 								R.id.contactName, R.id.dateName,
@@ -36,11 +37,11 @@ public class ClientViewActivity extends Activity {
 								{"毎月20日", "毎月20日"},
 								{"812-8639", "812-0043"},
 								{"福岡市博多区堅粕３丁目１６番１４号", "福岡市博多区堅粕３丁目１６番１６号"}};
+	/* お客様データここまで */
 
-	
+	private final Integer CHECKNUM = 4;	
 	
 	public AlertDialog.Builder dialog;
-	private final Integer CHECKNUM = 4;
 	//お客様データベース引数
 	public UserDBHelper userDBHel;
 	//発注設定データベース引数

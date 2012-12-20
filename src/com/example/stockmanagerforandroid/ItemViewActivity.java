@@ -65,7 +65,6 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	/* 商品データ配列ここまで　*/
 	
 	ItemDBHelper itemDBH;
-	ItemGenreDBHelper itemGenreDBH;
 	
 	public ArrayAdapter<String> genAdapter;
 	public ArrayAdapter<Integer> valueAdapter;
@@ -122,6 +121,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		setContentView(R.layout.item_view_layout);
 		//itemDBにデータを入れる
 		saveItemDB();
+		//itemDBテーブルに入っているデータをListViewに表示
+		showItemDB(null, null, null);
 		urlSt = "172.16.80.35/android/index.php/?";
 		//発注ID。発注するたびにorderIdに＋１される
 		setOrderId_In_DB();
@@ -131,6 +132,9 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		
 		//カートダイアログ表示ボタン
 		cartDialog = new AlertDialog.Builder(this);
+		//"商品リスト"にクリックリスナー
+		itemListClick();
+		//"カート"ボタンにクリックリスナー
 		cartClick();
 		//ClientViewActivityからownerIdとuserIdを持ってくる
 		Intent intent = getIntent();
@@ -145,10 +149,6 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		rowButton = (ImageButton)findViewById(R.id.rowButton);
 		rowButton.setOnClickListener(this);
 		
-		itemListClick();
-		
-		//itemDBテーブルに入っているデータをListViewに表示
-		showItemDB(null, null, null);
 	}
 	
 	//ItemDBHelperのitemDBテーブルにinsertする
@@ -248,6 +248,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		} else {
 			imageList.setAdapter(null);
 		}
+		itemDBH.close();
 	}
 	//Dialogを表示するボタンの処理
 	public void onClick(View view) {
@@ -308,29 +309,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			showItemDB(select,selectArgs,orderBy);
 		}
 	}
-	
-	//ジャンルと商品をデータベースに入れる
-	public void saveGenreDB() {
-		itemGenreDBH = new ItemGenreDBHelper(this);
-		SQLiteDatabase db = itemGenreDBH.getWritableDatabase();
-		ContentValues values = new ContentValues();
-		for (int i = 0;i < itemName.length;i++) {
-			values.put("itemName", itemName[i]);
-			//itemName[0]とitemName[1]がgenre[1]
-			//itemName[2]とitemName[3]がgenre[2]
-			//itemName[4]とitemName[5]がgenre[3]
-			if (itemName[0].equals(itemName[i]) || itemName[1].equals(itemName[i])) {
-				values.put("genre", genre[1]);
-			} else if (itemName[2].equals(itemName[i]) || itemName[3].equals(itemName[i])) {
-				values.put("genre", genre[2]);
-			} else if (itemName[4].equals(itemName[i]) || itemName[5].equals(itemName[i])) {
-				values.put("genre", genre[3]);
-			}
-		}
-		db.insertOrThrow("itemGenreDB", null, values);
-		itemGenreDBH.close();
-	}
-	
+
 	//"ジャンルボタン"を押した時の処理
 	public void showGenDia() {
 		genreDialog = new AlertDialog.Builder(this);
@@ -405,15 +384,9 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		alignText.setText("条件 : " + alignListSt[alignId]);
 		rowDialog.create();
 		rowDialog.show();
-//		//昇順
-//		orderBy = "itemValue ASC";
-//		showItemDB(null,null,orderBy);
-//		TextView orderByText = (TextView)findViewById(R.id.termRow);
-//		orderByText.setText("条件 : 昇順");
 	}
 	
 	//価格設定ダイアログで最小値から最大値までをlistViewに表示させる
-	
 	public void setValView() {
 		
 		EditText minEditVw = (EditText)itemValVw.findViewById(R.id.minText);
@@ -500,16 +473,18 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	//引数:ListViewのView
 	//viewに表示させる
 	public void setListDiaView(View view) {
-		TextView itemNameView = (TextView)view.findViewById(R.id.itemName);
-		String itemName = itemNameView.getText().toString();
+		TextView itemIdView = (TextView)view.findViewById(R.id.itemId);
+		String itemId = itemIdView.getText().toString();
 		itemDBH = new ItemDBHelper(this);
 		SQLiteDatabase dbItem = itemDBH.getReadableDatabase();
 		String sql = "SELECT itemId, itemImageId, itemValue, itemName, itemData"
-					+ " from itemDB where itemName = ?;";
-		Cursor cur = dbItem.rawQuery(sql, new String[] { itemName, });
+					+ " FROM itemDB WHERE itemId = ?;";
+		Cursor cur = dbItem.rawQuery(sql, new String[] { itemId, });
 		cur.moveToFirst();
 		Log.d("setListDiaView(view)","itemId:" + cur.getString(0));
 		setBuyLayout(cur);
+		
+		itemDBH.close();
 	}
 	
 	//引数：データベースのカーソル
@@ -534,10 +509,10 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		//小計に使うので別変数に入れる
 		TextView valueView = (TextView)buyView.findViewById(R.id.value);
 		value = c.getInt(2);
-		valueView.setText("単価：" + value);
+		valueView.setText("単価：" + value.toString());
 		
 		TextView minTotalVw = (TextView)buyView.findViewById(R.id.minTotal);
-		minTotalVw.setText("小計：" + value);
+		minTotalVw.setText("小計：" + value.toString());
 		
 		TextView nameView = (TextView)buyView.findViewById(R.id.itemName);
 		nameView.setText(c.getString(3));
@@ -609,17 +584,17 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		String sql = "SELECT ownerId, itemImageId FROM orderSetDBTable WHERE ownerId = ? GROUP BY itemImageId;";
 		Cursor cur = db_order.rawQuery(sql, new String[] { ownerId, });
 		Integer itemType_num = cur.getCount();
-		Log.d("addNum_CartView","商品の種類別個数" + String.valueOf(itemType_num));
+		Log.d("setTotalNumView","商品の種類別個数" + String.valueOf(itemType_num));
 		orderSet_DBH.close();			
 		
 		TextView itemNum_View = (TextView)findViewById(R.id.itemNum_view);
-		itemNum_View.setText(itemType_num);
+		itemNum_View.setText(itemType_num.toString());
 		
 	}
 	
 	//"カート"ボタンを押したあとの処理
 	//showした"AlertDialog"を返す
-	public AlertDialog.Builder showCartDialog() {
+	public void showCartDialog() {
 		ListView listInCart = (ListView)cartView.findViewById(R.id.itemListInCart);
 		
 		List<CustomDialogInCart> objects = new ArrayList<CustomDialogInCart>();
@@ -636,17 +611,22 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		}
 		CustomAdapterInCart adapter = new CustomAdapterInCart(this, 0, objects);
 		listInCart.setAdapter(adapter);
-		
+		showCartTotal();
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 		dialogBuilder.setView(cartView);
-		//http通信
-		sendOrder();
-		
-		dialogBuilder.create();
 		dialogBuilder.show();
-		return dialogBuilder;
+		
+		//"この内容で発注送信"ボタンの処理
+		sendOrder();
+		//"納品設定"ボタンの処理
+		orderItem_set();
+		//"履歴に保存"ボタンの処理
+		saveHistoryDB();
+		//"すべて削除"ボタンの処理
+		setAllDel_Click();
+		
 	}
-	/*あとで配列に全部入れる。今はテスト */
+
 	//発注したい情報をOrderSetDBから入れる変数
 	Integer[] imageId_In_OrderDB = new Integer[10];
 	Integer[] itemNum_In_OrderDB = new Integer[10];
@@ -662,6 +642,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	int roopCount;
 	//"カート"ボタンを押した時、データベースから発注情報を持ってくる
 	public void setOrderDB_In_Cart() {
+		Log.d("setOrderDB_In_Cart()", "ownerId:" + ownerId);
 		OrderSetDBHelper orderDB = new OrderSetDBHelper(this);
 		SQLiteDatabase db_order = orderDB.getReadableDatabase();
 		String sql = "SELECT ownerId, itemImageId, item_num, sumValue FROM orderSetDBTable WHERE ownerId = ?;";
@@ -677,7 +658,6 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			cur.moveToNext();
 		}
 		orderDB.close(); 
-		
 		setItemDB_In_Cart();
 	}
 	
@@ -708,12 +688,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				// TODO 自動生成されたメソッド・スタブ	
 				//"カート"の中に入っている商品を一旦配列に入れる
 				setOrderDB_In_Cart();
-				//"カート"ダイアログの"納品設定"処理
-				orderItem_set();
-				//"履歴に保存"ボタンの処理
-				saveHistoryDB();
-				//"すべて削除"ボタンの処理//"カート"ダイアログを表示
-				setAllDel_Click(showCartDialog());
+				//"カート"ダイアログを表示
+				showCartDialog();
 			}
 		});
 	}
@@ -747,6 +723,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 					}
 				}).start();
 				/* http通信Thread終了 */
+				setAllDel_Click();
 				//新しい発注IDを取得
 				setOrderId_In_DB();
 			}			
@@ -764,7 +741,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	}
 	
 	AlertDialog.Builder orderSet_Dialog;
-	
+	View orderSet_View;
+	TextView orderDateView;
 	//"カート"ボタンpush↓
 	//ダイアログ表示↓
 	//"納品設定"ボタンにクリックリスナー↓
@@ -773,8 +751,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		//dateListViewのクリックされた日付データが入る
 		LayoutInflater inflater = LayoutInflater.from(this);
 		//View cart_dialogView = inflater.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
-		final View orderSet_View = inflater.inflate(R.layout.order_set_dialog_layout, (ViewGroup)findViewById(R.id.orderSet_dialog_Ll));
-		final TextView orderDateView = (TextView)orderSet_View.findViewById(R.id.sendOrder_date);
+		orderSet_View = inflater.inflate(R.layout.order_set_dialog_layout, (ViewGroup)findViewById(R.id.orderSet_dialog_Ll));
+		orderDateView = (TextView)orderSet_View.findViewById(R.id.sendOrder_date);
 		Log.d("orderItem_set()", "01");
 		Button deliBtn = (Button)cartView.findViewById(R.id.deliveryBtn);
 		deliBtn.setOnClickListener(new OnClickListener() {	
@@ -791,7 +769,6 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 						orderDate_setDB(); 
 						
 					}
-					
 				});
 				//ownerIdを元に各Widgetにデータベースから持ってきてset
 				setOrderView_from_userDB(orderSet_View);
@@ -871,6 +848,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			orderSet_TxVw[i].setText(c.getString(i));
 			Log.d("setOrderView_from_userDB()", "0" + i);
 		}
+		userDBH.close();
 		
 	}
 	//日付処理
@@ -897,7 +875,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	
 	//"カート"ボタンを押したあとのダイアログの中の処理
 	//"すべて削除"ボタンにクリックリスナー
-	public void setAllDel_Click(final AlertDialog.Builder dialog) {
+	public void setAllDel_Click() {
 		Button allClearBtn = (Button)cartView.findViewById(R.id.allClear);
 		allClearBtn.setOnClickListener(new OnClickListener() {
 
@@ -905,7 +883,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				// TODO 自動生成されたメソッド・スタブ
 				orderCount = 0;
 				allClear();
-				dialog.create().dismiss();
+				setTotalNumView();
 			}
 			
 		});

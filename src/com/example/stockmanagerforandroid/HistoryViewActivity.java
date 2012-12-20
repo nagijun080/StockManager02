@@ -31,7 +31,7 @@ public class HistoryViewActivity extends Activity {
 		
 		Intent intent = getIntent();
 		ownerId = intent.getStringExtra("ownerId_");
-		intent.getStringExtra("userId_");
+		userId = intent.getStringExtra("userId_");
 		//onCreate()されたら配列に"発注履歴"を格納
 		setHistory();
 		
@@ -107,29 +107,29 @@ public class HistoryViewActivity extends Activity {
 			item.setOwnerId(_ownerId[i]);
 			item.setStatus(_status[i]);
 			item.setTotalValue(_totalValue[i]);
-			item.setUserId(_userId[i]);
+			item.setUserId(_company[i]);
 			objects.add(item);
 		}
 		CustomAdapterInHis adapter = new CustomAdapterInHis(this,0,objects);
 		hisListView.setAdapter(adapter);
 	}
 	
-	//"ステータス"にクリックリスナー
-	public void setStatusClick() {
-		TextView statusView = (TextView)findViewById(R.id.statusView);
-		statusView.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View view) {
-				// TODO 自動生成されたメソッド・スタブ
-				statusClick();
-			}
-		});
-	}
-	
-	//"ステータス"をクリックしたあとの処理
-	public void statusClick() {
-		
-	}
+//	//"ステータス"にクリックリスナー
+//	public void setStatusClick() {
+//		TextView statusView = (TextView)findViewById(R.id.statusView);
+//		statusView.setOnClickListener(new OnClickListener() {
+//
+//			public void onClick(View view) {
+//				// TODO 自動生成されたメソッド・スタブ
+//				statusClick();
+//			}
+//		});
+//	}
+//	
+//	//"ステータス"をクリックしたあとの処理
+//	public void statusClick() {
+//		
+//	}
 
 	@Override
 	protected void onStop() {
