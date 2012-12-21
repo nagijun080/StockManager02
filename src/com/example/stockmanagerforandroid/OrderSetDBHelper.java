@@ -20,7 +20,7 @@ public class OrderSetDBHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		// TODO 自動生成されたメソッド・スタブ
 		String sql = "CREATE TABLE orderSetDBTable ( _ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-				+ " orderId INTEGER, ownerId TEXT, userId INTEGER, urlEt TEXT, itemImageId INTEGER, item_num INTEGER, sumValue INTEGER, orderDate TEXT);";
+				+ " orderId INTEGER, ownerId TEXT, userId INTEGER, urlEt TEXT, itemId TEXT, item_num INTEGER, sumValue INTEGER, orderDate TEXT);";
 		db.execSQL(sql);
 		
 	}

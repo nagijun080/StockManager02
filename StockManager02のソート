@@ -1,0 +1,40 @@
+orderId=1000,ownerId=0000,userId=
+商品を選んでクリック
+-itemListClick()
+	-showListDialog():ダイアログ表示
+	-setListDiaView(View view)
+	{ view.itemId=00001,cur="SELECT itemId, itemImageId,
+					 itemValue, itemName, itemData
+					 FROM itemDB WHERE itemId = 20001;" }itemIdを元にitemDBテーブルから検索
+		-setBuyLayout(Cursor c):Viewに商品情報をセット
+		{ item_count=1, c.getString(0)=item_ID=20001,c.getInt(1)=item_ImageId=R.drawable.imac_215,
+		c.getInt(2)=value=128800,item_mTotalValue=128800,c.getString(3)="21.5インチiMac",
+		c.getString(4)="クアッドコアIntel Core i5" }
+			-item_Num_ValueChange():小計を出す	
+				item_mTotalValue=item_count*value;
+								
+	そのまま"買い物カゴに追加"ボタンをクリック
+	-showListDialog().onClick():"買い物カゴに追加"ボタン
+	 	-setOrder_DB(): { orderId=1000,ownerId=0000,userId="00001",itemId=20001,
+	 					  item_count=1,item_mTotalValue=128800,}
+	 					  //DB_insert:orderSetDBTableに格納
+	 	-setTotalNumView(): { itemType_num=1 }
+	 	ownerIdを元にOrderSetDBTableから商品の種類数をitemType_numに入れてViewにセット
+	 	
+カートボタンクリック
+-cartClick():
+	-setOrderDB_In_Cart():orderSetDBTableからownerId=0000を元に取り出す
+		{ roopCount=1, itemId_In_OrderDB[0]=20001,itemNum_In_OrderDB[0]=1,
+		minTotal_In_OrderDB[0]=128800,orderCount=1 }
+		
+		-setItemDB_In_Cart(): itemId_In_OrderDB[0]を元にitemDBテーブルから商品情報を取り出す
+		{ itemId_InItemDB[0]="20001",itemImageId_ItemDB[0]=R.drawable.imac_215,itemName_In_ItemDB[0]="21.5インチiMac",
+		  unitPrice_In_ItemDB[0]=128800,itemData_In_ItemDB[0]="クアッドコアIntel Core i5" }
+		  
+	-showCartDialog():"カート"の中身を配列を使って表示する
+	{ setView : itemImageId_ItemDB[0]=R.drawable.imac_215,itemNum_In_OrderDB[0]=1,minTotal_In_OrderDB[0]=128800,
+				itemData_In_ItemDB[0]="クアッドコアIntel Core i5",itemName_In_ItemDB[0]="21.5インチiMac",
+				unitPrice_In_ItemDB[0]=128800 }
+	
+		  
+		

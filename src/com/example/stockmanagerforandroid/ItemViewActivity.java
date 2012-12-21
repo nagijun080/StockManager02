@@ -49,7 +49,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public Integer[] itemImageId = { R.drawable.imac_215, R.drawable.imac_27,
 								R.drawable.ipad_mini_bk, R.drawable.ipad_mini_whi,
 								R.drawable.macbook_13, R.drawable.macbook_13_retina };
-	public String[] itemId = { "00001", "00002", "00003", "00004", "00005", "00006", };
+	public String[] itemId = { "20001", "20002", "20003", "20004", "20005", "20006", };
 	//macの商品名配列(itemIdと対応させる)
 	public String[]  itemName = { "21.5インチiMac", "27インチiMac", 
 			"iPadmini ブラック＆ストレート","iPadmini ホワイト＆シルバー", 
@@ -125,7 +125,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		showItemDB(null, null, null);
 		urlSt = "172.16.80.35/android/index.php/?";
 		//発注ID。発注するたびにorderIdに＋１される
-		setOrderId_In_DB();
+		setOrderId();
 		//LayoutのvalueViewだけ改行処理
 		TextView valueV = (TextView)findViewById(R.id.valueView);
 		valueV.setText("価格を\n絞り込む");
@@ -452,15 +452,13 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		buyView = inflater.inflate(R.layout.item_buy_layout, (ViewGroup)findViewById(R.id.itemBuyLayout));
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setView(buyView);
-		//クリックしたら買えるようにする
+		//"買い物カゴに追加"ボタン
 		alertDialog.setPositiveButton("買い物カゴに追加", new DialogInterface.OnClickListener() {
 
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO 自動生成されたメソッド・スタブ
 				setOrder_DB();
 				setTotalNumView();
-				//商品数初期化
-				item_count = 1;
 			}
 			
 		});
@@ -495,12 +493,19 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	Integer value;
 	//商品画像が入っているリソースID
 	Integer item_ImageId;
+	//商品の個数を入れる変数
+	public Integer item_count = 1;
+	//商品のIDを入れる変数
+	public String item_ID;
+	//価格の小計
+	public Integer item_mTotalValue;
 	public void setBuyLayout(Cursor c) {
 		TextView item_numView = (TextView)buyView.findViewById(R.id.itemCount);
 		item_numView.setText("個数：" + item_count);
 		
 		TextView itemIdView = (TextView)buyView.findViewById(R.id.itemNumber);
-		itemIdView.setText("品番:" + c.getString(0));
+		item_ID = c.getString(0);
+		itemIdView.setText("品番:" + item_ID);
 		
 		ImageView itemImageVw = (ImageView)buyView.findViewById(R.id.itemImage);
 		item_ImageId = c.getInt(1);
@@ -511,27 +516,20 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		value = c.getInt(2);
 		valueView.setText("単価：" + value.toString());
 		
+		//商品の個数を変更する
+		item_Num_ValueChange();
 		TextView minTotalVw = (TextView)buyView.findViewById(R.id.minTotal);
-		minTotalVw.setText("小計：" + value.toString());
+		minTotalVw.setText("小計：" + item_mTotalValue.toString());
 		
 		TextView nameView = (TextView)buyView.findViewById(R.id.itemName);
 		nameView.setText(c.getString(3));
 		
 		TextView dataView = (TextView)buyView.findViewById(R.id.itemData);
 		dataView.setText(c.getString(4));
-		//商品の個数を変更する
-		item_Num_ValueChange(c);
 	}
-	//個数を入れる引数
-	//showListDialog()内のPositiveButtonでitem_numを発注データベースに保存する
-	Integer item_count = 1;
-	//価格の小計
-	Integer item_mSumValue;
 	//"商品詳細ダイアログ"の"個数変更"ボタンの処理
-	public void item_Num_ValueChange(final Cursor c) {
-		final TextView item_numView = (TextView)buyView.findViewById(R.id.itemCount);
-		final TextView item_mTotalView = (TextView)buyView.findViewById(R.id.minTotal);
-		
+	public void item_Num_ValueChange() {
+		item_mTotalValue = value * item_count;
 		Button downButton = (Button)buyView.findViewById(R.id.downButton);
 		downButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -539,10 +537,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				if (!(item_count <= 1)) {
 					item_count--;
 				}
-				item_numView.setText("個数：" + item_count);
-				item_mSumValue = c.getInt(2) * item_count;
-				item_mTotalView.setText("小計：" + item_mSumValue);
-				
+				item_mTotalValue = value * item_count;				
 			}
 		});
 		
@@ -551,9 +546,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			public void onClick(View v) {
 				// TODO 自動生成されたメソッド・スタブ
 				item_count++;
-				item_numView.setText("個数：" + item_count); 
-				item_mSumValue = c.getInt(2) * item_count;
-				item_mTotalView.setText("小計：" + item_mSumValue);
+				item_mTotalValue = value * item_count;
 			}
 		});
 	}
@@ -567,9 +560,9 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		order_values.put("orderId", orderId);
 		order_values.put("ownerId", ownerId);
 		order_values.put("userId", userId);
-		order_values.put("itemImageId", item_ImageId);
+		order_values.put("itemId", item_ID);
 		order_values.put("item_num", item_count);
-		order_values.put("sumValue", item_mSumValue);
+		order_values.put("sumValue", item_mTotalValue);
 		db_order.insertOrThrow("orderSetDBTable", null, order_values);
 		db_order.close();
 		orderSet_DBH.close();
@@ -581,7 +574,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		OrderSetDBHelper orderSet_DBH = new OrderSetDBHelper(this);
 		SQLiteDatabase db_order = orderSet_DBH.getReadableDatabase();
 		
-		String sql = "SELECT ownerId, itemImageId FROM orderSetDBTable WHERE ownerId = ? GROUP BY itemImageId;";
+		String sql = "SELECT ownerId, itemId FROM orderSetDBTable WHERE ownerId = ? GROUP BY itemId;";
 		Cursor cur = db_order.rawQuery(sql, new String[] { ownerId, });
 		Integer itemType_num = cur.getCount();
 		Log.d("setTotalNumView","商品の種類別個数" + String.valueOf(itemType_num));
@@ -593,14 +586,15 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	}
 	
 	//"カート"ボタンを押したあとの処理
-	//showした"AlertDialog"を返す
 	public void showCartDialog() {
+		LayoutInflater inflate = LayoutInflater.from(this);
+		cartView = inflate.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
 		ListView listInCart = (ListView)cartView.findViewById(R.id.itemListInCart);
 		
 		List<CustomDialogInCart> objects = new ArrayList<CustomDialogInCart>();
 		for (int i = 0;i < orderCount;i++) {
 			CustomDialogInCart item = new CustomDialogInCart();
-			item.setImageId(imageId_In_OrderDB[i]);
+			item.setImageId(itemImageId_ItemDB[i]);
 			item.setItemNum(itemNum_In_OrderDB[i].toString());
 			item.setItemMinTotal(minTotal_In_OrderDB[i].toString());
 			item.setItemData(itemData_In_ItemDB[i]);
@@ -628,33 +622,32 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	}
 
 	//発注したい情報をOrderSetDBから入れる変数
-	Integer[] imageId_In_OrderDB = new Integer[10];
+	Integer[] itemId_In_OrderDB = new Integer[10];
 	Integer[] itemNum_In_OrderDB = new Integer[10];
 	Integer[] minTotal_In_OrderDB = new Integer[10];
 	//imageId_In_OrderDBを元にItemDBHelperから情報と得る
 	String[] itemId_In_ItemDB = new String[10];
+	Integer[] itemImageId_ItemDB = new Integer[10];
 	String[] itemName_In_ItemDB = new String[10];
 	String[] itemData_In_ItemDB = new String[10];
 	String[] unitPrice_In_ItemDB = new String[10];
-	//カートの中に入っている商品数
+	//カートの中に入っている商品数//http通信をする回数 = カートに入れた回数
 	int orderCount = 0;
-	//http通信をする回数 = カートに入れた回数
-	int roopCount;
 	//"カート"ボタンを押した時、データベースから発注情報を持ってくる
 	public void setOrderDB_In_Cart() {
 		Log.d("setOrderDB_In_Cart()", "ownerId:" + ownerId);
 		OrderSetDBHelper orderDB = new OrderSetDBHelper(this);
 		SQLiteDatabase db_order = orderDB.getReadableDatabase();
-		String sql = "SELECT ownerId, itemImageId, item_num, sumValue FROM orderSetDBTable WHERE ownerId = ?;";
+		String sql = "SELECT ownerId, itemId, item_num, sumValue FROM orderSetDBTable WHERE ownerId = ?;";
 		Cursor cur = db_order.rawQuery(sql, new String[] { ownerId });
 		cur.moveToFirst();
-		roopCount = cur.getCount();
-		for (int i = 0;i < roopCount;i++) {
-			imageId_In_OrderDB[i] = cur.getInt(1);
+		orderCount = cur.getCount();
+		for (int i = 0;i < orderCount;i++) {
+			Log.d("setOrderDB_In_Cart()", String.valueOf(cur.getInt(1)));
+			itemId_In_OrderDB[i] = cur.getInt(1);
 			itemNum_In_OrderDB[i] = cur.getInt(2);
 			Log.d("setOrderDB()","01 : " + cur.getInt(2));
 			minTotal_In_OrderDB[i] = cur.getInt(3);
-			orderCount++;
 			cur.moveToNext();
 		}
 		orderDB.close(); 
@@ -666,11 +659,12 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	public void setItemDB_In_Cart()	 {
 		ItemDBHelper itemDBH = new ItemDBHelper(this);
 		SQLiteDatabase db_item = itemDBH.getReadableDatabase();
-		String sql = "SELECT itemId, itemImageId, itemName, itemValue, itemData FROM itemDB WHERE itemImageId = ?;";
+		String sql = "SELECT itemId, itemImageId, itemName, itemValue, itemData FROM itemDB WHERE itemId = ?;";
 		for (int i = 0;i < orderCount;i++) {
-			Cursor c = db_item.rawQuery(sql, new String[]{ imageId_In_OrderDB[i].toString(), });
+			Cursor c = db_item.rawQuery(sql, new String[]{ itemId_In_OrderDB[i].toString(), });
 			c.moveToFirst();
 			itemId_In_ItemDB[i] = c.getString(0);
+			itemImageId_ItemDB[i] = c.getInt(1);
 			itemName_In_ItemDB[i] = c.getString(2);
 			unitPrice_In_ItemDB[i] = c.getString(3);
 			itemData_In_ItemDB[i] = c.getString(4);
@@ -680,8 +674,6 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 	
 	//"カート"ボタンにクリックリスナ-登録
 	public void cartClick() {
-		LayoutInflater inflate = LayoutInflater.from(this);
-		cartView = inflate.inflate(R.layout.cart_dialog_view, (ViewGroup)findViewById(R.id.dialogInCart_ll));
 		Button cartButton = (Button)findViewById(R.id.btnCart);
 		cartButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -705,7 +697,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				/* http通信Thread */
 				new Thread( new Runnable() {
 					public void run() {
-						for (int i = 0;i < roopCount;i++) {
+						for (int i = 0;i < orderCount;i++) {
 							HttpConnection httpConect = new HttpConnection();
 							String url_ = "http://" + urlSt;
 							String uri = "orderId:=" + orderId.toString() + "&" + "ownerId:=" + ownerId + "&" + "itemId:=" + itemId_In_ItemDB[i] + "&"
@@ -725,7 +717,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 				/* http通信Thread終了 */
 				setAllDel_Click();
 				//新しい発注IDを取得
-				setOrderId_In_DB();
+				setOrderId();
 			}			
 		});
 	}
@@ -882,6 +874,7 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 			public void onClick(View v) {
 				// TODO 自動生成されたメソッド・スタブ
 				orderCount = 0;
+				item_count = 1;
 				allClear();
 				setTotalNumView();
 			}
@@ -902,11 +895,12 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		orderDBH.close();
 		
 		//発注したい情報をOrderSetDBから入れる変数
-		imageId_In_OrderDB = new Integer[10];
+		itemId_In_OrderDB = new Integer[10];
 		itemNum_In_OrderDB = new Integer[10];
 		minTotal_In_OrderDB = new Integer[10];
 		//imageId_In_OrderDBを元にItemDBHelperから情報と得る
 		itemId_In_ItemDB = new String[10];
+		itemImageId_ItemDB = new Integer[10];
 		itemName_In_ItemDB = new String[10];
 		itemData_In_ItemDB = new String[10];
 		unitPrice_In_ItemDB = new String[10];
@@ -927,8 +921,8 @@ public class ItemViewActivity extends Activity implements OnClickListener, Dialo
 		totalView.setText("合計：" + getTotal_In_Cart());
 	}
 	
-	//商品の発注IDをデータベースに格納
-	public void setOrderId_In_DB() {
+	//商品の発注IDをorderIdにセット
+	public void setOrderId() {
 		OrderSetDBHelper orderSetDBH = new OrderSetDBHelper(this);
 		SQLiteDatabase db_orderDB = orderSetDBH.getWritableDatabase();
 		
